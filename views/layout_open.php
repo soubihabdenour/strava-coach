@@ -43,6 +43,20 @@
         .phase-pill { color: #000; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
         .field { display:block; margin: 16px 0 6px; font-weight: 600; }
         .input { width:100%; padding:10px; border-radius:6px; background:#0f1115; color:var(--text); border:1px solid #2a2f3a; font-size:16px; }
+        .coach-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .coach-tab { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: var(--card); color: var(--muted); border-radius: 8px; text-decoration: none; font-size: 14px; }
+        .coach-tab:hover { color: var(--text); }
+        .coach-tab.active { color: var(--text); background: #2a2f3a; }
+        .coach-tab-icon { font-size: 16px; }
+        .coach-chat { display: flex; flex-direction: column; gap: 10px; min-height: 120px; max-height: 540px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px; }
+        .coach-empty { color: var(--muted); font-size: 14px; padding: 20px 8px; text-align: center; }
+        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; line-height: 1.5; font-size: 15px; word-wrap: break-word; }
+        .msg.user { align-self: flex-end; background: var(--accent); color: #fff; }
+        .msg.model { align-self: flex-start; background: #0f1115; color: var(--text); }
+        .msg.error { align-self: stretch; max-width: 100%; background: rgba(245, 158, 11, 0.12); color: var(--warn); border: 1px solid var(--warn); font-size: 14px; }
+        .coach-form textarea { width: 100%; padding: 12px; background: #0f1115; color: var(--text); border: 1px solid #2a2f3a; border-radius: 8px; font-size: 16px; font-family: inherit; resize: vertical; }
+        .coach-form-actions { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
+        .coach-form-actions button { border: none; cursor: pointer; }
         .lang-bar { display:flex; justify-content:flex-end; gap: 4px; font-size: 12px; margin-bottom: 12px; }
         .lang-bar a { color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: .05em; }
         .lang-bar a:hover { color: var(--text); }

@@ -10,7 +10,8 @@ $current = $summary['current_block'];
 <header>
     <h1><?= t('dashboard.greeting', e($athlete['firstname'] ?? 'athlete')) ?></h1>
     <div>
-        <a class="btn" href="plan.php" style="padding: 8px 14px; font-size: 14px;"><?= e(t('dashboard.training_plan')) ?></a>
+        <a class="btn" href="coach.php" style="padding: 8px 14px; font-size: 14px;"><?= e(t('coach.page_title')) ?></a>
+        <a class="btn" href="plan.php" style="padding: 8px 14px; font-size: 14px; margin-left: 8px;"><?= e(t('dashboard.training_plan')) ?></a>
         <a class="muted" href="logout.php" style="margin-left: 16px;"><?= e(t('dashboard.disconnect')) ?></a>
     </div>
 </header>

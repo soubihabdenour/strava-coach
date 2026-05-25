@@ -9,7 +9,10 @@ $current = $summary['current_block'];
 ?>
 <header>
     <h1>Hi <?= e($athlete['firstname'] ?? 'athlete') ?> 👋</h1>
-    <a class="muted" href="logout.php">Disconnect</a>
+    <div>
+        <a class="btn" href="plan.php" style="padding: 8px 14px; font-size: 14px;">Training plan</a>
+        <a class="muted" href="logout.php" style="margin-left: 16px;">Disconnect</a>
+    </div>
 </header>
 
 <div class="grid">

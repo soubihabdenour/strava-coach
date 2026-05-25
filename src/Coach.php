@@ -38,8 +38,8 @@ class Coach
         if ($s['total_activities'] === 0) {
             return [[
                 'level' => 'info',
-                'title' => 'No recent activity',
-                'body' => 'Sync a workout in Strava to unlock coaching. Start with a 20–30 minute easy effort to baseline your fitness.',
+                'title' => t('coach.no_activity.title'),
+                'body' => t('coach.no_activity.body'),
             ]];
         }
 
@@ -48,26 +48,20 @@ class Coach
             if ($delta > 30) {
                 $tips[] = [
                     'level' => 'warn',
-                    'title' => 'Volume spike — back off this week',
-                    'body' => sprintf(
-                        'Your last 4 weeks of distance are %+d%% vs the prior block. The 10%% rule is a guideline; sustained jumps above 25–30%% raise injury risk. Hold or trim volume 10–15%% this week and keep intensity easy.',
-                        (int)round($delta)
-                    ),
+                    'title' => t('coach.volume_spike.title'),
+                    'body' => t('coach.volume_spike.body', (int)round($delta)),
                 ];
             } elseif ($delta < -25) {
                 $tips[] = [
                     'level' => 'info',
-                    'title' => 'Volume has dropped — rebuild gradually',
-                    'body' => sprintf(
-                        'You logged %+d%% less distance in the past 4 weeks. Aim to add ~10%% per week back to your previous baseline before pushing intensity.',
-                        (int)round($delta)
-                    ),
+                    'title' => t('coach.volume_drop.title'),
+                    'body' => t('coach.volume_drop.body', (int)round($delta)),
                 ];
             } else {
                 $tips[] = [
                     'level' => 'good',
-                    'title' => 'Volume is in a healthy range',
-                    'body' => sprintf('4-week distance change vs the prior block: %+d%%. Stay near this load while you build consistency.', (int)round($delta)),
+                    'title' => t('coach.volume_healthy.title'),
+                    'body' => t('coach.volume_healthy.body', (int)round($delta)),
                 ];
             }
         }
@@ -76,14 +70,14 @@ class Coach
         if ($rest < 2) {
             $tips[] = [
                 'level' => 'warn',
-                'title' => 'Too few rest days',
-                'body' => sprintf('Only %d full rest day(s) in the past 14. Schedule at least 1–2 complete rest days per week — adaptation happens during recovery, not during training.', $rest),
+                'title' => t('coach.few_rest.title'),
+                'body' => t('coach.few_rest.body', $rest),
             ];
         } elseif ($rest > 8) {
             $tips[] = [
                 'level' => 'info',
-                'title' => 'Long stretches of inactivity',
-                'body' => sprintf('%d rest days in the last 14. If unintentional, add a short 20-min activity on two of those days to keep the engine warm.', $rest),
+                'title' => t('coach.inactive.title'),
+                'body' => t('coach.inactive.body', $rest),
             ];
         }
 
@@ -91,8 +85,8 @@ class Coach
         if ($longRunShare !== null && $longRunShare > 0.5) {
             $tips[] = [
                 'level' => 'warn',
-                'title' => 'One workout dominates your week',
-                'body' => sprintf('Your longest single session is %d%% of weekly volume. Spread mileage across 3–5 sessions to reduce per-workout strain.', (int)round($longRunShare * 100)),
+                'title' => t('coach.one_workout.title'),
+                'body' => t('coach.one_workout.body', (int)round($longRunShare * 100)),
             ];
         }
 
@@ -102,14 +96,14 @@ class Coach
             if ($intensity['easy_pct'] < 70) {
                 $tips[] = [
                     'level' => 'warn',
-                    'title' => 'Too much hard running',
-                    'body' => sprintf('Only %d%% of your time is in easy HR zones. Polarized / 80-20 training recommends ~80%% easy, 20%% hard. Slow down most days to absorb harder sessions.', $easyPct),
+                    'title' => t('coach.too_hard.title'),
+                    'body' => t('coach.too_hard.body', $easyPct),
                 ];
             } else {
                 $tips[] = [
                     'level' => 'good',
-                    'title' => 'Healthy easy/hard split',
-                    'body' => sprintf('About %d%% of your time is easy. That gives the body room to adapt while keeping hard sessions effective.', $easyPct),
+                    'title' => t('coach.healthy_split.title'),
+                    'body' => t('coach.healthy_split.body', $easyPct),
                 ];
             }
         }
@@ -121,8 +115,8 @@ class Coach
             if ($topShare > 0.9 && count($this->activities) > 6) {
                 $tips[] = [
                     'level' => 'info',
-                    'title' => 'Add cross-training',
-                    'body' => sprintf('%d%% of activities are %s. One weekly low-impact session (bike, swim, strength) reduces overuse risk and builds aerobic base.', (int)round($topShare * 100), $top),
+                    'title' => t('coach.cross_train.title'),
+                    'body' => t('coach.cross_train.body', (int)round($topShare * 100), $top),
                 ];
             }
         }
@@ -257,8 +251,8 @@ class Coach
         if ($todayLoad > 60) {
             return [
                 'level' => 'info',
-                'title' => "Tomorrow's plan: recovery",
-                'body' => 'Long session today. Tomorrow: easy 30–40 min in zone 1–2, or full rest. Hydrate, eat carbs + protein within 60 min.',
+                'title' => t('coach.next_recovery.title'),
+                'body' => t('coach.next_recovery.body'),
             ];
         }
 
@@ -266,21 +260,21 @@ class Coach
         if ($weekKm < 10) {
             return [
                 'level' => 'info',
-                'title' => "Next session: easy build",
-                'body' => '30–40 min at conversational pace (zone 2). Focus on cadence and breathing — no watch chasing.',
+                'title' => t('coach.next_easy.title'),
+                'body' => t('coach.next_easy.body'),
             ];
         }
         if ($weekKm < 30) {
             return [
                 'level' => 'info',
-                'title' => "Next session: tempo intervals",
-                'body' => 'Warm up 15 min easy. 4 × 5 min at comfortably-hard effort (zone 3–4), 2 min jog between. Cool down 10 min.',
+                'title' => t('coach.next_tempo.title'),
+                'body' => t('coach.next_tempo.body'),
             ];
         }
         return [
             'level' => 'info',
-            'title' => "Next session: long aerobic",
-            'body' => 'Build to 70–90 min steady at low zone 2. Optional: last 10 min at marathon-pace effort to teach the body to finish strong.',
+            'title' => t('coach.next_long.title'),
+            'body' => t('coach.next_long.body'),
         ];
     }
 }

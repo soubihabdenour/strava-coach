@@ -3,11 +3,11 @@
 class PlanGenerator
 {
     public const GOALS = [
-        'fitness'  => ['label' => 'General fitness',  'min_weeks' => 4,  'max_weeks' => 16, 'default_weeks' => 8,  'peak_km' => 40,  'sessions_per_week' => 4],
-        '5k'       => ['label' => '5K race',          'min_weeks' => 6,  'max_weeks' => 12, 'default_weeks' => 8,  'peak_km' => 45,  'sessions_per_week' => 5],
-        '10k'      => ['label' => '10K race',         'min_weeks' => 8,  'max_weeks' => 14, 'default_weeks' => 10, 'peak_km' => 55,  'sessions_per_week' => 5],
-        'half'     => ['label' => 'Half marathon',    'min_weeks' => 10, 'max_weeks' => 16, 'default_weeks' => 12, 'peak_km' => 70,  'sessions_per_week' => 5],
-        'marathon' => ['label' => 'Marathon',         'min_weeks' => 14, 'max_weeks' => 20, 'default_weeks' => 16, 'peak_km' => 90,  'sessions_per_week' => 6],
+        'fitness'  => ['min_weeks' => 4,  'max_weeks' => 16, 'default_weeks' => 8,  'peak_km' => 40,  'sessions_per_week' => 4],
+        '5k'       => ['min_weeks' => 6,  'max_weeks' => 12, 'default_weeks' => 8,  'peak_km' => 45,  'sessions_per_week' => 5],
+        '10k'      => ['min_weeks' => 8,  'max_weeks' => 14, 'default_weeks' => 10, 'peak_km' => 55,  'sessions_per_week' => 5],
+        'half'     => ['min_weeks' => 10, 'max_weeks' => 16, 'default_weeks' => 12, 'peak_km' => 70,  'sessions_per_week' => 5],
+        'marathon' => ['min_weeks' => 14, 'max_weeks' => 20, 'default_weeks' => 16, 'peak_km' => 90,  'sessions_per_week' => 6],
     ];
 
     private const PHASE_SPLIT = ['base' => 0.40, 'build' => 0.35, 'peak' => 0.15, 'taper' => 0.10];
@@ -57,7 +57,7 @@ class PlanGenerator
 
         return [
             'goal' => $goal,
-            'goal_label' => $cfg['label'],
+            'locale' => I18n::locale(),
             'start_date' => $startDate->format('Y-m-d'),
             'goal_date' => $goalDate->format('Y-m-d'),
             'weeks_total' => $weeks,
@@ -121,12 +121,12 @@ class PlanGenerator
     private function weekTheme(string $phase, int $weekIdx, int $totalWeeks, string $goal): string
     {
         $isDeload = ($weekIdx + 1) % 4 === 0 && $phase !== 'taper';
-        if ($isDeload) return 'Deload — drop volume, keep rhythm';
+        if ($isDeload) return t('theme.deload');
         return match ($phase) {
-            'base'  => 'Aerobic base — easy mileage and frequency',
-            'build' => 'Build phase — introduce threshold and VO2 work',
-            'peak'  => 'Race-specific — sharpen at goal pace',
-            'taper' => $weekIdx === $totalWeeks - 1 ? 'Race week — rest, fuel, execute' : 'Taper — reduce volume, hold intensity',
+            'base'  => t('theme.base'),
+            'build' => t('theme.build'),
+            'peak'  => t('theme.peak'),
+            'taper' => $weekIdx === $totalWeeks - 1 ? t('theme.race_week') : t('theme.taper'),
             default => '',
         };
     }
@@ -153,21 +153,21 @@ class PlanGenerator
         $easyKm = $remaining / max(1, $easySlots);
 
         $schedule = [
-            'Mon' => $this->rest('Recovery — full rest or 20 min walk/mobility.'),
+            'Mon' => $this->rest(t('sched.mon_rest')),
             'Tue' => $this->wrapQuality($quality),
-            'Wed' => $this->easy($easyKm, 'Easy aerobic — conversational pace (zone 2). Nose-breathing if possible.'),
+            'Wed' => $this->easy($easyKm, t('sched.wed_easy')),
             'Thu' => $phase === 'base'
-                ? $this->easy($easyKm * 1.1, 'Mid-week steady — relaxed but committed. Add 4×20s strides at the end.')
+                ? $this->easy($easyKm * 1.1, t('sched.thu_base'))
                 : $this->tempo($goal, $phase, $weekKm),
-            'Fri' => $this->rest('Rest or 30–40 min cross-train (bike, swim, easy strength).'),
+            'Fri' => $this->rest(t('sched.fri_rest')),
             'Sat' => $sessionsPerWeek >= 5
-                ? $this->easy($easyKm * 0.8, 'Pre-long-run shakeout — easy 30–45 min, include 4×20s strides.')
-                : $this->rest('Optional cross-train or rest.'),
+                ? $this->easy($easyKm * 0.8, t('sched.sat_shakeout'))
+                : $this->rest(t('sched.sat_rest')),
             'Sun' => $this->long($longKm, $phase, $goal),
         ];
 
         if ($sessionsPerWeek >= 6) {
-            $schedule['Fri'] = $this->easy($easyKm * 0.8, 'Easy recovery run — slow and short, primer for the weekend.');
+            $schedule['Fri'] = $this->easy($easyKm * 0.8, t('sched.fri_easy_6day'));
         }
 
         $ordered = [];
@@ -193,24 +193,24 @@ class PlanGenerator
     {
         $pool = match ($phase) {
             'base' => [
-                ['title' => 'Hill strides',           'distance_km' => 7,  'desc' => '15 min easy warm-up. 6×20s uphill strides at hard effort, walk down. 15 min easy cool-down.'],
-                ['title' => 'Easy + strides',         'distance_km' => 8,  'desc' => '40–50 min easy aerobic. Finish with 6×20s strides on flat ground, full recovery between.'],
-                ['title' => 'Fartlek (play)',         'distance_km' => 8,  'desc' => '15 min warm-up. 8×1 min steady (zone 3) / 1 min jog. 10 min cool-down.'],
+                ['title' => t('quality.base.hill_strides.title'),  'distance_km' => 7,  'desc' => t('quality.base.hill_strides.desc')],
+                ['title' => t('quality.base.easy_strides.title'),  'distance_km' => 8,  'desc' => t('quality.base.easy_strides.desc')],
+                ['title' => t('quality.base.fartlek.title'),       'distance_km' => 8,  'desc' => t('quality.base.fartlek.desc')],
             ],
             'build' => [
-                ['title' => 'VO2 intervals 5×800m',   'distance_km' => 9,  'desc' => '15 min warm-up. 5×800m at 5K effort, 2:30 jog recovery. 10 min cool-down.'],
-                ['title' => 'Cruise intervals',       'distance_km' => 10, 'desc' => '15 min warm-up. 4×1 km at threshold (comfortably hard), 90s jog. 10 min cool-down.'],
-                ['title' => 'Hill repeats 6×90s',     'distance_km' => 8,  'desc' => '15 min warm-up. 6×90s uphill at hard effort, jog down recovery. 10 min cool-down.'],
+                ['title' => t('quality.build.vo2.title'),          'distance_km' => 9,  'desc' => t('quality.build.vo2.desc')],
+                ['title' => t('quality.build.cruise.title'),       'distance_km' => 10, 'desc' => t('quality.build.cruise.desc')],
+                ['title' => t('quality.build.hills.title'),        'distance_km' => 8,  'desc' => t('quality.build.hills.desc')],
             ],
             'peak' => [
-                ['title' => 'Goal-pace intervals',    'distance_km' => 10, 'desc' => '15 min warm-up. 5×1 km at goal race pace, 2 min jog. 10 min cool-down.'],
-                ['title' => 'Race-pace simulation',   'distance_km' => 11, 'desc' => '15 min warm-up. 3×2 km at goal race pace, 3 min jog. 10 min cool-down.'],
-                ['title' => 'Sharpening 200s',        'distance_km' => 8,  'desc' => '15 min warm-up. 10×200m fast (slightly under 5K pace), 200m jog recovery. 10 min cool-down.'],
+                ['title' => t('quality.peak.goal_pace.title'),     'distance_km' => 10, 'desc' => t('quality.peak.goal_pace.desc')],
+                ['title' => t('quality.peak.race_sim.title'),      'distance_km' => 11, 'desc' => t('quality.peak.race_sim.desc')],
+                ['title' => t('quality.peak.sharp_200.title'),     'distance_km' => 8,  'desc' => t('quality.peak.sharp_200.desc')],
             ],
             'taper' => [
-                ['title' => 'Pace primer',            'distance_km' => 7,  'desc' => '15 min warm-up. 4×400m at goal race pace, 2 min jog. 10 min easy.'],
+                ['title' => t('quality.taper.primer.title'),       'distance_km' => 7,  'desc' => t('quality.taper.primer.desc')],
             ],
-            default => [['title' => 'Easy', 'distance_km' => 6, 'desc' => 'Easy 40 min.']],
+            default => [['title' => t('quality.default.title'), 'distance_km' => 6, 'desc' => t('quality.default.desc')]],
         };
         return $pool[$weekIdx % count($pool)];
     }
@@ -220,23 +220,23 @@ class PlanGenerator
         $minutes = $phase === 'peak' ? 30 : ($phase === 'build' ? 25 : 20);
         return [
             'type' => 'tempo',
-            'title' => 'Tempo run',
+            'title' => t('pday.tempo_title'),
             'distance_km' => round(min(12, max(6, $weekKm * 0.18)), 1),
-            'desc' => "15 min easy. {$minutes} min at comfortably-hard threshold pace (you can speak 3–4 words at a time). 10 min easy cool-down.",
+            'desc' => t('pday.tempo_desc', $minutes),
         ];
     }
 
     private function long(float $km, string $phase, string $goal): array
     {
-        $desc = "Steady aerobic long run at conversational pace. Practice race-day fueling if going over 75 min.";
+        $desc = t('pday.long_desc_default');
         if ($phase === 'peak' && in_array($goal, ['half', 'marathon'], true)) {
-            $desc = "Long run with finishing quality: last 15–20 min at goal race pace. Practice fueling.";
+            $desc = t('pday.long_desc_peak');
         } elseif ($phase === 'build') {
-            $desc = "Long aerobic run — final 10 min progressively faster (still controlled).";
+            $desc = t('pday.long_desc_build');
         }
         return [
             'type' => 'long',
-            'title' => "Long run {$km} km",
+            'title' => t('pday.long_run', $km),
             'distance_km' => $km,
             'desc' => $desc,
         ];
@@ -247,7 +247,7 @@ class PlanGenerator
         $km = round(max(3, $km), 1);
         return [
             'type' => 'easy',
-            'title' => "Easy {$km} km",
+            'title' => t('pday.easy_km', $km),
             'distance_km' => $km,
             'desc' => $desc,
         ];
@@ -255,7 +255,7 @@ class PlanGenerator
 
     private function rest(string $desc): array
     {
-        return ['type' => 'rest', 'title' => 'Rest', 'distance_km' => 0, 'desc' => $desc];
+        return ['type' => 'rest', 'title' => t('pday.rest'), 'distance_km' => 0, 'desc' => $desc];
     }
 
     private function wrapQuality(array $q): array
@@ -271,20 +271,20 @@ class PlanGenerator
     private function raceWeek(string $goal): array
     {
         $raceDesc = match ($goal) {
-            '5k'       => 'RACE DAY — 5K. 15 min warm-up with strides. Go out controlled, build into it.',
-            '10k'      => 'RACE DAY — 10K. 15 min warm-up with 4×100m strides. First 2 km steady, then settle to goal pace.',
-            'half'     => 'RACE DAY — Half marathon. 10 min easy warm-up. Hold goal pace from the start, fuel every 30–40 min.',
-            'marathon' => 'RACE DAY — Marathon. No warm-up beyond walking. Start 5–10 sec/km slower than goal pace. Fuel every 30 min, drink every aid station.',
-            default    => 'Goal day — execute your event.',
+            '5k'       => t('race.5k'),
+            '10k'      => t('race.10k'),
+            'half'     => t('race.half'),
+            'marathon' => t('race.marathon'),
+            default    => t('race.default'),
         };
         return [
-            ['day' => 'Mon', 'type' => 'rest',   'title' => 'Rest',              'distance_km' => 0, 'desc' => 'Full rest. Hydrate, sleep, light stretching.'],
-            ['day' => 'Tue', 'type' => 'easy',   'title' => 'Easy 30\'',          'distance_km' => 5, 'desc' => '30 min very easy. Just opening the legs.'],
-            ['day' => 'Wed', 'type' => 'quality','title' => 'Sharpener 4×400m',   'distance_km' => 6, 'desc' => '15 min warm-up. 4×400m at goal race pace, 2 min jog. 10 min cool-down.'],
-            ['day' => 'Thu', 'type' => 'rest',   'title' => 'Rest',              'distance_km' => 0, 'desc' => 'Rest or 20 min walk. Start carb loading if event > 90 min.'],
-            ['day' => 'Fri', 'type' => 'easy',   'title' => 'Shakeout 20\'',      'distance_km' => 3, 'desc' => '20 min very easy + 4×20s strides. Lay out race kit tonight.'],
-            ['day' => 'Sat', 'type' => 'rest',   'title' => 'Rest',              'distance_km' => 0, 'desc' => 'Rest. Light meal, hydrate, early to bed.'],
-            ['day' => 'Sun', 'type' => 'race',   'title' => 'RACE',              'distance_km' => 0, 'desc' => $raceDesc],
+            ['day' => 'Mon', 'type' => 'rest',    'title' => t('pday.rest'),      'distance_km' => 0, 'desc' => t('race.mon.desc')],
+            ['day' => 'Tue', 'type' => 'easy',    'title' => t('race.tue.title'), 'distance_km' => 5, 'desc' => t('race.tue.desc')],
+            ['day' => 'Wed', 'type' => 'quality', 'title' => t('race.wed.title'), 'distance_km' => 6, 'desc' => t('race.wed.desc')],
+            ['day' => 'Thu', 'type' => 'rest',    'title' => t('pday.rest'),      'distance_km' => 0, 'desc' => t('race.thu.desc')],
+            ['day' => 'Fri', 'type' => 'easy',    'title' => t('race.fri.title'), 'distance_km' => 3, 'desc' => t('race.fri.desc')],
+            ['day' => 'Sat', 'type' => 'rest',    'title' => t('pday.rest'),      'distance_km' => 0, 'desc' => t('race.sat.desc')],
+            ['day' => 'Sun', 'type' => 'race',    'title' => t('race.sun.title'), 'distance_km' => 0, 'desc' => $raceDesc],
         ];
     }
 }

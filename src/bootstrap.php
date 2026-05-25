@@ -2,12 +2,14 @@
 
 require_once __DIR__ . '/Config.php';
 require_once __DIR__ . '/StravaClient.php';
+require_once __DIR__ . '/i18n.php';
 require_once __DIR__ . '/Coach.php';
 require_once __DIR__ . '/PlanGenerator.php';
 
 Config::load(__DIR__ . '/../.env');
 
 session_start();
+I18n::init();
 
 function strava_client(): StravaClient
 {

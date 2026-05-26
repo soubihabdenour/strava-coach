@@ -13,12 +13,24 @@ if (isset($_GET['reset'])) {
     exit;
 }
 
+$apiKey = Config::get('GEMINI_API_KEY');
+$aiAvailable = !empty($apiKey);
+
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') === 'generate') {
     $goal = $_POST['goal'] ?? '10k';
     $goalDate = $_POST['goal_date'] ?? '';
+    $weeklyHours = (int)($_POST['weekly_hours'] ?? 8);
+    $longRunDay = $_POST['long_run_day'] ?? 'Sun';
+    $injuries = trim($_POST['injuries'] ?? '');
+    $useAi = !empty($_POST['use_ai']) && $aiAvailable;
+
     if (!isset(PlanGenerator::GOALS[$goal]) || !$goalDate) {
         http_response_code(400);
         exit('Invalid input.');
+    }
+    if (PlanGenerator::GOALS[$goal]['ai_only'] && !$useAi) {
+        http_response_code(400);
+        exit('This goal requires AI generation. Add GEMINI_API_KEY to .env or pick a run goal.');
     }
 
     try {
@@ -32,8 +44,23 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
         $activities = strava_client()->fetchRecentActivities($token, 28);
         $coach = new Coach($activities);
         $baseline = $coach->summary()['current_block']['distance_km'] / 4;
+        $paces = PaceCalculator::compute($activities);
 
-        $plan = (new PlanGenerator())->generate($goal, $start, $end, $baseline);
+        if ($useAi) {
+            $plan = (new AiPlanGenerator(gemini_client()))->generate($goal, $start, $end, [
+                'weekly_hours' => $weeklyHours,
+                'long_run_day' => $longRunDay,
+                'injuries' => $injuries ?: 'none reported',
+                'baseline_km' => $baseline,
+                'paces' => $paces,
+            ], I18n::locale());
+        } else {
+            $plan = (new PlanGenerator())->generate($goal, $start, $end, $baseline);
+            $plan['engine'] = 'rule';
+            $plan['sport'] = PlanGenerator::GOALS[$goal]['sport'] ?? 'run';
+            $plan['paces'] = $paces;
+            $plan['weekly_hours'] = $weeklyHours;
+        }
         $_SESSION['plan'] = $plan;
     } catch (Throwable $e) {
         http_response_code(500);
@@ -44,8 +71,49 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
     exit;
 }
 
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') === 'regenerate' && !empty($_SESSION['plan'])) {
+    $plan = $_SESSION['plan'];
+    try {
+        $client = gemini_client();
+        $activities = strava_client()->fetchRecentActivities($token, 56);
+        $perWeek = CompletionTracker::perWeek($plan, $activities);
+        $completion = CompletionTracker::forPrompt($perWeek);
+
+        $baseline = (new Coach($activities))->summary()['current_block']['distance_km'] / 4;
+        $paces = PaceCalculator::compute($activities);
+
+        $newPlan = (new AiPlanGenerator($client))->generate(
+            $plan['goal'],
+            new DateTimeImmutable('today'),
+            new DateTimeImmutable($plan['goal_date']),
+            [
+                'weekly_hours' => $plan['weekly_hours'] ?? 8,
+                'long_run_day' => 'Sun',
+                'injuries' => 'none reported',
+                'baseline_km' => $baseline,
+                'paces' => $paces,
+                'completion' => $completion,
+            ],
+            I18n::locale()
+        );
+        $_SESSION['plan'] = $newPlan;
+    } catch (Throwable $e) {
+        http_response_code(500);
+        exit('Could not regenerate plan: ' . e($e->getMessage()));
+    }
+    header('Location: plan.php');
+    exit;
+}
+
 if (!empty($_SESSION['plan'])) {
-    render('plan', ['plan' => $_SESSION['plan']]);
+    $plan = $_SESSION['plan'];
+    $completion = null;
+    try {
+        $activities = strava_client()->fetchRecentActivities($token, 56);
+        $completion = CompletionTracker::perWeek($plan, $activities);
+    } catch (Throwable) {
+    }
+    render('plan', ['plan' => $plan, 'completion' => $completion, 'aiAvailable' => $aiAvailable]);
     exit;
 }
 
@@ -53,12 +121,16 @@ try {
     $activities = strava_client()->fetchRecentActivities($token, 28);
     $coach = new Coach($activities);
     $baseline = $coach->summary()['current_block']['distance_km'] / 4;
+    $paces = PaceCalculator::compute($activities);
 } catch (Throwable $e) {
     $baseline = 0;
+    $paces = ['run' => ['has_data' => false, 'zones' => []], 'bike' => ['has_data' => false], 'swim' => ['has_data' => false]];
 }
 
 render('plan_form', [
     'goals' => PlanGenerator::GOALS,
     'baselineKm' => $baseline,
     'defaultGoalDate' => (new DateTimeImmutable('+10 weeks'))->format('Y-m-d'),
+    'aiAvailable' => $aiAvailable,
+    'paces' => $paces,
 ]);

@@ -3,11 +3,17 @@
 class PlanGenerator
 {
     public const GOALS = [
-        'fitness'  => ['min_weeks' => 4,  'max_weeks' => 16, 'default_weeks' => 8,  'peak_km' => 40,  'sessions_per_week' => 4],
-        '5k'       => ['min_weeks' => 6,  'max_weeks' => 12, 'default_weeks' => 8,  'peak_km' => 45,  'sessions_per_week' => 5],
-        '10k'      => ['min_weeks' => 8,  'max_weeks' => 14, 'default_weeks' => 10, 'peak_km' => 55,  'sessions_per_week' => 5],
-        'half'     => ['min_weeks' => 10, 'max_weeks' => 16, 'default_weeks' => 12, 'peak_km' => 70,  'sessions_per_week' => 5],
-        'marathon' => ['min_weeks' => 14, 'max_weeks' => 20, 'default_weeks' => 16, 'peak_km' => 90,  'sessions_per_week' => 6],
+        'fitness'    => ['min_weeks' => 4,  'max_weeks' => 16, 'default_weeks' => 8,  'peak_km' => 40,  'sessions_per_week' => 4, 'sport' => 'run', 'ai_only' => false],
+        '5k'         => ['min_weeks' => 6,  'max_weeks' => 12, 'default_weeks' => 8,  'peak_km' => 45,  'sessions_per_week' => 5, 'sport' => 'run', 'ai_only' => false],
+        '10k'        => ['min_weeks' => 8,  'max_weeks' => 14, 'default_weeks' => 10, 'peak_km' => 55,  'sessions_per_week' => 5, 'sport' => 'run', 'ai_only' => false],
+        'half'       => ['min_weeks' => 10, 'max_weeks' => 16, 'default_weeks' => 12, 'peak_km' => 70,  'sessions_per_week' => 5, 'sport' => 'run', 'ai_only' => false],
+        'marathon'   => ['min_weeks' => 14, 'max_weeks' => 20, 'default_weeks' => 16, 'peak_km' => 90,  'sessions_per_week' => 6, 'sport' => 'run', 'ai_only' => false],
+        'gran_fondo' => ['min_weeks' => 10, 'max_weeks' => 20, 'default_weeks' => 14, 'peak_km' => 350, 'sessions_per_week' => 5, 'sport' => 'bike', 'ai_only' => true],
+        'swim_5k'    => ['min_weeks' => 8,  'max_weeks' => 16, 'default_weeks' => 12, 'peak_km' => 18,  'sessions_per_week' => 4, 'sport' => 'swim', 'ai_only' => true],
+        'sprint_tri' => ['min_weeks' => 8,  'max_weeks' => 14, 'default_weeks' => 10, 'peak_km' => 0,   'sessions_per_week' => 6, 'sport' => 'tri',  'ai_only' => true],
+        'oly_tri'    => ['min_weeks' => 12, 'max_weeks' => 18, 'default_weeks' => 14, 'peak_km' => 0,   'sessions_per_week' => 7, 'sport' => 'tri',  'ai_only' => true],
+        'half_iron'  => ['min_weeks' => 16, 'max_weeks' => 24, 'default_weeks' => 20, 'peak_km' => 0,   'sessions_per_week' => 8, 'sport' => 'tri',  'ai_only' => true],
+        'full_iron'  => ['min_weeks' => 20, 'max_weeks' => 32, 'default_weeks' => 24, 'peak_km' => 0,   'sessions_per_week' => 9, 'sport' => 'tri',  'ai_only' => true],
     ];
 
     private const PHASE_SPLIT = ['base' => 0.40, 'build' => 0.35, 'peak' => 0.15, 'taper' => 0.10];

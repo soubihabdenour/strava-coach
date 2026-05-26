@@ -26,15 +26,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $_SESSION['coach_history'][$sport][] = ['role' => 'user', 'text' => $message];
 
         try {
-            $apiKey = Config::get('GEMINI_API_KEY');
-            if (!$apiKey) {
-                throw new RuntimeException('GEMINI_API_KEY not configured. Add it to .env.');
-            }
+            $client = gemini_client();
             $activities = strava_client()->fetchRecentActivities($token, 28);
             $summary = (new Coach($activities))->summary();
             $systemPrompt = CoachAgent::buildSystemPrompt($sport, $summary, I18n::locale());
 
-            $client = new GeminiClient($apiKey);
             $reply = $client->chat($systemPrompt, $_SESSION['coach_history'][$sport]);
 
             $_SESSION['coach_history'][$sport][] = ['role' => 'model', 'text' => $reply];

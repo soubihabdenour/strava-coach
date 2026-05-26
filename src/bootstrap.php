@@ -4,8 +4,11 @@ require_once __DIR__ . '/Config.php';
 require_once __DIR__ . '/StravaClient.php';
 require_once __DIR__ . '/i18n.php';
 require_once __DIR__ . '/Coach.php';
+require_once __DIR__ . '/PaceCalculator.php';
 require_once __DIR__ . '/PlanGenerator.php';
 require_once __DIR__ . '/GeminiClient.php';
+require_once __DIR__ . '/AiPlanGenerator.php';
+require_once __DIR__ . '/CompletionTracker.php';
 require_once __DIR__ . '/CoachAgent.php';
 
 Config::load(__DIR__ . '/../.env');
@@ -23,6 +26,16 @@ function strava_client(): StravaClient
         exit('Missing STRAVA_CLIENT_ID / STRAVA_CLIENT_SECRET. Copy .env.example to .env and fill them in.');
     }
     return new StravaClient($id, $secret, $redirect);
+}
+
+function gemini_client(): GeminiClient
+{
+    $apiKey = Config::get('GEMINI_API_KEY');
+    if (!$apiKey) {
+        throw new RuntimeException('GEMINI_API_KEY not configured. Add it to .env.');
+    }
+    $model = Config::get('GEMINI_MODEL') ?: 'gemini-2.5-flash';
+    return new GeminiClient($apiKey, $model);
 }
 
 function current_access_token(): ?string

@@ -24,7 +24,7 @@
         </div>
     <?php endif; ?>
 
-    <form method="post" action="plan.php">
+    <form method="post" action="plan.php" data-loading="<?= e(t('loading.plan_generating')) ?>">
         <input type="hidden" name="action" value="generate">
 
         <label class="field"><?= e(t('plan_form.goal')) ?></label>

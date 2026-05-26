@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e(t('app.title')) ?></title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <style>
         :root { --bg:#0f1115; --card:#1a1d24; --text:#e6e8ec; --muted:#8a93a6; --accent:#fc4c02; --good:#22c55e; --warn:#f59e0b; --info:#60a5fa; }
         * { box-sizing: border-box; }
@@ -57,12 +58,23 @@
         .coach-form textarea { width: 100%; padding: 12px; background: #0f1115; color: var(--text); border: 1px solid #2a2f3a; border-radius: 8px; font-size: 16px; font-family: inherit; resize: vertical; }
         .coach-form-actions { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
         .coach-form-actions button { border: none; cursor: pointer; }
-        .lang-bar { display:flex; justify-content:flex-end; gap: 4px; font-size: 12px; margin-bottom: 12px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #1f2330; }
+        .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; }
+        .brand-logo { width: 28px; height: 28px; flex-shrink: 0; }
+        .brand-name { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+        .lang-bar { display:flex; gap: 4px; font-size: 12px; }
         .lang-bar a { color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: .05em; }
         .lang-bar a:hover { color: var(--text); }
-        .lang-bar a.active { color: var(--text); background: var(--card); }
+        .lang-bar a.active { color: var(--text); background: #0f1115; }
+        .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(15,17,21,0.85); backdrop-filter: blur(2px); z-index: 1000; align-items: center; justify-content: center; flex-direction: column; gap: 20px; }
+        .loading-overlay.visible { display: flex; }
+        .loading-spinner { width: 56px; height: 56px; border: 4px solid rgba(255,255,255,0.08); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite; }
+        .loading-text { color: var(--text); font-size: 16px; max-width: 320px; text-align: center; padding: 0 20px; }
+        .loading-hint { color: var(--muted); font-size: 13px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 600px) {
             .container { padding: 20px 14px; }
+            .brand-name { display: none; }
             header { margin-bottom: 20px; }
             header h1 { font-size: 20px; }
             h2 { font-size: 16px; }
@@ -80,9 +92,33 @@
     </style>
 </head>
 <body>
-<div class="container">
-<div class="lang-bar">
-    <?php foreach (I18n::supported() as $loc): ?>
-        <a href="<?= e(lang_url($loc)) ?>" class="<?= I18n::locale() === $loc ? 'active' : '' ?>"><?= e($loc) ?></a>
-    <?php endforeach; ?>
+<div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <div class="loading-text"></div>
+    <div class="loading-hint"><?= e(t('loading.hint')) ?></div>
 </div>
+<div class="container">
+<div class="top-bar">
+    <a class="brand" href="<?= current_access_token() ? 'dashboard.php' : 'index.php' ?>">
+        <img class="brand-logo" src="/favicon.svg" alt="">
+        <span class="brand-name"><?= e(t('app.title')) ?></span>
+    </a>
+    <div class="lang-bar">
+        <?php foreach (I18n::supported() as $loc): ?>
+            <a href="<?= e(lang_url($loc)) ?>" class="<?= I18n::locale() === $loc ? 'active' : '' ?>"><?= e($loc) ?></a>
+        <?php endforeach; ?>
+    </div>
+</div>
+<script>
+document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!form.matches || !form.matches('[data-loading]')) return;
+    var overlay = document.getElementById('loading-overlay');
+    overlay.querySelector('.loading-text').textContent = form.dataset.loading || '';
+    overlay.classList.add('visible');
+});
+window.addEventListener('pageshow', function () {
+    var overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.classList.remove('visible');
+});
+</script>

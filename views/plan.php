@@ -30,7 +30,7 @@ $sportIcons = [
     <h1><?= e(t('plan.title', t('goal.' . $plan['goal']))) ?></h1>
     <div>
         <?php if ($aiAvailable && ($plan['engine'] ?? 'rule') === 'ai'): ?>
-            <form method="post" action="plan.php" style="display:inline;">
+            <form method="post" action="plan.php" style="display:inline;" data-loading="<?= e(t('loading.plan_regenerating')) ?>">
                 <input type="hidden" name="action" value="regenerate">
                 <button type="submit" class="muted" style="background:none; border:none; color: var(--muted); cursor:pointer; font-size: 14px; margin-right: 16px;">
                     <?= e(t('plan.regenerate')) ?>

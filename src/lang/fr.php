@@ -3,6 +3,11 @@
 return [
     'app.title' => 'Coach Personnel Strava',
 
+    'loading.hint' => 'Cela peut prendre 5 à 30 secondes.',
+    'loading.plan_generating' => 'Génération de ton plan d\'entraînement…',
+    'loading.plan_regenerating' => 'Recalibrage de ton plan…',
+    'loading.coach_thinking' => 'Ton coach réfléchit…',
+
     'landing.hero.title' => 'Ton coach personnel,<br>propulsé par Strava.',
     'landing.hero.body' => 'Connecte ton compte Strava et reçois des retours d\'entraînement adaptés à tes 12 dernières semaines d\'activité — tendances de volume, équilibre du repos, mix d\'intensité, et ta prochaine séance.',
     'landing.cta' => 'Se connecter avec Strava',

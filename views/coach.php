@@ -42,7 +42,7 @@ $sportIcons = [
         <?php endif; ?>
     </div>
 
-    <form method="post" class="coach-form">
+    <form method="post" class="coach-form" data-loading="<?= e(t('loading.coach_thinking')) ?>">
         <textarea name="message" rows="3" maxlength="4000" placeholder="<?= e(t('coach.placeholder')) ?>" required></textarea>
         <div class="coach-form-actions">
             <button type="submit" class="btn"><?= e(t('coach.send')) ?></button>

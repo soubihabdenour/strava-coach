@@ -4,11 +4,11 @@
 /** @var ?string $error */
 
 $sportIcons = [
-    'run'       => '🏃',
-    'swim'      => '🏊',
-    'cycle'     => '🚴',
-    'tri'       => '🏆',
-    'nutrition' => '🥗',
+    'run'       => 'run',
+    'swim'      => 'swim',
+    'cycle'     => 'bike',
+    'tri'       => 'tri',
+    'nutrition' => 'nutrition',
 ];
 ?>
 <header>
@@ -19,7 +19,7 @@ $sportIcons = [
 <div class="coach-tabs">
     <?php foreach (CoachAgent::SPORTS as $s): ?>
         <a href="coach.php?sport=<?= e($s) ?>" class="coach-tab <?= $s === $sport ? 'active' : '' ?>">
-            <span class="coach-tab-icon"><?= $sportIcons[$s] ?></span>
+            <span class="coach-tab-icon"><?= icon($sportIcons[$s]) ?></span>
             <?= e(t('coach.sport.' . $s)) ?>
         </a>
     <?php endforeach; ?>

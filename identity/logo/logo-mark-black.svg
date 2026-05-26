@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#FC4C02"/>
-  <g fill="#FFFFFF">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Personal Coach logo mark, monochrome black">
+  <title>Personal Coach (mono black)</title>
+  <g fill="#0F1115">
     <rect x="12"   y="40" width="9" height="14" rx="1.5"/>
     <rect x="23.5" y="32" width="9" height="22" rx="1.5"/>
     <rect x="35"   y="22" width="9" height="32" rx="1.5"/>

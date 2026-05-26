@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" role="img" aria-label="Personal Coach – wordmark only">
+  <title>Personal Coach wordmark</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&amp;display=swap');
+    .word { font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; fill: #0F1115; font-size: 36px; }
+  </style>
+  <text class="word" x="0" y="38">PERSONAL</text>
+  <text class="word" x="0" y="74">COACH</text>
+  <line x1="0" y1="58" x2="280" y2="58" stroke="#FC4C02" stroke-width="2" opacity="0"/>
+</svg>

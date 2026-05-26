@@ -5,14 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e(t('app.title')) ?></title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
     <style>
-        :root { --bg:#0f1115; --card:#1a1d24; --text:#e6e8ec; --muted:#8a93a6; --accent:#fc4c02; --good:#22c55e; --warn:#f59e0b; --info:#60a5fa; }
+        :root {
+            /* Personal Coach brand tokens */
+            --pc-brand: #FC4C02;
+            --pc-brand-strong: #D63F00;
+            --pc-bg: #0F1115;
+            --pc-surface: #1A1D24;
+            --pc-surface-elevated: #14171F;
+            --pc-border: #2A2F3A;
+            --pc-text: #E6E8EC;
+            --pc-text-muted: #8A93A6;
+            --pc-success: #22C55E;
+            --pc-warning: #F59E0B;
+            --pc-info:    #60A5FA;
+            --pc-danger:  #EF4444;
+            --pc-phase-base:  #60A5FA;
+            --pc-phase-build: #A78BFA;
+            --pc-phase-peak:  #FC4C02;
+            --pc-phase-taper: #22C55E;
+            --pc-radius-sm: 6px;
+            --pc-radius-md: 8px;
+            --pc-radius-lg: 12px;
+            --pc-radius-pill: 999px;
+            --pc-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+            --pc-font-ui:      'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+            /* Legacy aliases so existing rules keep working */
+            --bg: var(--pc-bg); --card: var(--pc-surface); --text: var(--pc-text);
+            --muted: var(--pc-text-muted); --accent: var(--pc-brand);
+            --good: var(--pc-success); --warn: var(--pc-warning); --info: var(--pc-info);
+        }
         * { box-sizing: border-box; }
-        body { margin:0; font:16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); -webkit-text-size-adjust: 100%; }
+        body { margin:0; font: 400 16px/1.5 var(--pc-font-ui); background:var(--pc-bg); color:var(--pc-text); -webkit-text-size-adjust: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
         .container { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
         header { display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 12px; margin-bottom: 32px; }
-        h1 { font-size: 22px; margin: 0; }
-        h2 { font-size: 18px; margin: 0 0 16px; }
+        h1 { font-family: var(--pc-font-display); font-weight: 700; font-size: 22px; margin: 0; letter-spacing: -0.01em; }
+        h2 { font-family: var(--pc-font-display); font-weight: 600; font-size: 18px; margin: 0 0 16px; letter-spacing: -0.005em; }
         a.btn, button.btn { display:inline-block; background: var(--accent); color:#fff; padding: 12px 20px; border-radius: 8px; text-decoration:none; font-weight: 600; }
         a.btn:hover, button.btn:hover { opacity: 0.9; }
         a.muted { color: var(--muted); text-decoration: none; font-size: 14px; }
@@ -20,7 +53,7 @@
         .grid { display:grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 24px; }
         .stat { background: var(--card); border-radius: 12px; padding: 18px; }
         .stat .label { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
-        .stat .value { font-size: 28px; font-weight: 700; margin-top: 6px; word-break: break-word; }
+        .stat .value { font-family: var(--pc-font-display); font-size: 28px; font-weight: 700; margin-top: 6px; word-break: break-word; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
         .stat .delta { font-size: 13px; margin-top: 4px; }
         .tip { border-left: 4px solid var(--info); padding-left: 16px; margin-bottom: 12px; }
         .tip.good { border-color: var(--good); }
@@ -34,7 +67,7 @@
         .bar-labels { display:flex; gap: 6px; font-size: 11px; color: var(--muted); margin-top: 6px; }
         .bar-labels span { flex:1; text-align:center; }
         .hero { text-align: center; padding: 60px 20px; }
-        .hero h1 { font-size: 38px; margin-bottom: 16px; }
+        .hero h1 { font-family: var(--pc-font-display); font-weight: 700; font-size: 44px; margin-bottom: 16px; letter-spacing: -0.02em; line-height: 1.1; }
         .hero p { color: var(--muted); max-width: 560px; margin: 0 auto 32px; }
         .plan-day { display: grid; grid-template-columns: 50px 140px 1fr; gap: 12px; padding: 10px 12px; background: #0f1115; border-radius: 8px; align-items: start; }
         .plan-day .day-name { color: var(--muted); font-weight: 600; font-size: 13px; }
@@ -48,7 +81,10 @@
         .coach-tab { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: var(--card); color: var(--muted); border-radius: 8px; text-decoration: none; font-size: 14px; }
         .coach-tab:hover { color: var(--text); }
         .coach-tab.active { color: var(--text); background: #2a2f3a; }
-        .coach-tab-icon { font-size: 16px; }
+        .coach-tab-icon { font-size: 16px; display: inline-flex; align-items: center; }
+        .icon { width: 18px; height: 18px; display: inline-block; vertical-align: -3px; color: currentColor; }
+        .day-type .icon { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; color: #ffffff; }
+        .coach-tab .icon { width: 18px; height: 18px; color: currentColor; }
         .coach-chat { display: flex; flex-direction: column; gap: 10px; min-height: 120px; max-height: 540px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px; }
         .coach-empty { color: var(--muted); font-size: 14px; padding: 20px 8px; text-align: center; }
         .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; line-height: 1.5; font-size: 15px; word-wrap: break-word; }
@@ -61,7 +97,7 @@
         .top-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #1f2330; }
         .brand { display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; }
         .brand-logo { width: 28px; height: 28px; flex-shrink: 0; }
-        .brand-name { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+        .brand-name { font-family: var(--pc-font-display); font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
         .lang-bar { display:flex; gap: 4px; font-size: 12px; }
         .lang-bar a { color: var(--muted); text-decoration: none; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: .05em; }
         .lang-bar a:hover { color: var(--text); }

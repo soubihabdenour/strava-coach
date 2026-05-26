@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <!-- iOS auto-rounds; fill the full square. -->
+  <rect width="180" height="180" fill="#FC4C02"/>
+  <g fill="#FFFFFF">
+    <rect x="34"  y="112" width="22" height="34" rx="4"/>
+    <rect x="64"  y="90"  width="22" height="56" rx="4"/>
+    <rect x="94"  y="62"  width="22" height="84" rx="4"/>
+    <rect x="124" y="34"  width="22" height="112" rx="4"/>
+  </g>
+</svg>

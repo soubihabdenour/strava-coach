@@ -67,3 +67,18 @@ function e(?string $v): string
 {
     return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
 }
+
+/**
+ * Inline an SVG from public/icons/{name}.svg so it inherits currentColor.
+ * Pass extra CSS classes to apply (e.g. icon('run', 'sport-icon active')).
+ */
+function icon(string $name, string $class = 'icon'): string
+{
+    static $cache = [];
+    if (!isset($cache[$name])) {
+        $path = __DIR__ . '/../public/icons/' . basename($name) . '.svg';
+        $cache[$name] = is_file($path) ? file_get_contents($path) : '';
+    }
+    if (!$cache[$name]) return '';
+    return preg_replace('/<svg\b/', '<svg class="' . htmlspecialchars($class, ENT_QUOTES) . '"', $cache[$name], 1);
+}

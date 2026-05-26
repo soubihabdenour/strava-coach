@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Coach — Style Guide</title>
+<link rel="icon" type="image/svg+xml" href="logo/favicon.svg">
+<link rel="stylesheet" href="color/tokens.css">
+<link rel="stylesheet" href="typography/fonts.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--pc-bg); color: var(--pc-text); font-family: var(--pc-font-ui); font-size: var(--pc-size-md); line-height: var(--pc-leading-base); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px 96px; }
+  header.top { display:flex; align-items:center; gap:14px; padding-bottom: 28px; border-bottom: 1px solid var(--pc-border); margin-bottom: 56px; }
+  header.top img { width: 36px; height: 36px; }
+  header.top .name { font-family: var(--pc-font-display); font-weight: 700; font-size: var(--pc-size-lg); letter-spacing: var(--pc-tracking-tight); }
+  header.top .v { color: var(--pc-text-muted); font-size: var(--pc-size-sm); margin-left: auto; }
+
+  section { margin-bottom: 72px; }
+  h2.section-title { font-family: var(--pc-font-display); font-weight: 700; font-size: var(--pc-size-2xl); margin: 0 0 8px; letter-spacing: var(--pc-tracking-tight); }
+  .section-eyebrow { font-family: var(--pc-font-ui); font-weight: 600; font-size: var(--pc-size-xs); text-transform: uppercase; letter-spacing: var(--pc-tracking-caps); color: var(--pc-brand); margin-bottom: 6px; display: block; }
+  .section-lead { color: var(--pc-text-muted); max-width: 60ch; margin: 0 0 32px; }
+
+  .panel { background: var(--pc-surface); border-radius: var(--pc-radius-lg); padding: 28px; margin-bottom: 16px; }
+
+  /* Logo gallery */
+  .logo-grid { display:grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .logo-cell { background: var(--pc-surface); border-radius: var(--pc-radius-lg); padding: 32px; display:flex; align-items:center; justify-content:center; min-height: 160px; position: relative; }
+  .logo-cell.light { background: #FFFFFF; }
+  .logo-cell.photo { background: linear-gradient(135deg, #2a1f1a, #0f1115); }
+  .logo-cell img { max-width: 80%; max-height: 96px; }
+  .logo-cell .cap { position:absolute; bottom: 10px; left: 12px; font-size: var(--pc-size-xs); color: var(--pc-text-muted); }
+  .logo-cell.light .cap { color: #5A6478; }
+
+  /* Color swatches */
+  .swatch-row { display:grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+  .swatch { border-radius: var(--pc-radius-md); padding: 14px; min-height: 88px; display:flex; flex-direction:column; justify-content:space-between; }
+  .swatch .nm { font-weight: 600; font-size: var(--pc-size-sm); }
+  .swatch .hx { font-family: var(--pc-font-mono); font-size: var(--pc-size-xs); opacity: 0.85; }
+
+  /* Typography demos */
+  .demo-row { padding: 14px 0; border-bottom: 1px dashed var(--pc-border); display:flex; align-items:baseline; gap: 24px; }
+  .demo-row:last-child { border-bottom: 0; }
+  .demo-row .meta { color: var(--pc-text-muted); font-size: var(--pc-size-xs); min-width: 220px; font-family: var(--pc-font-mono); }
+
+  /* Components */
+  .btn { display:inline-flex; align-items:center; gap: 8px; padding: 12px 20px; border-radius: var(--pc-radius-md); font-family: var(--pc-font-ui); font-weight: 600; font-size: var(--pc-size-md); text-decoration: none; border: 0; cursor: pointer; }
+  .btn-primary { background: var(--pc-brand); color: #FFFFFF; }
+  .btn-primary:hover { background: var(--pc-brand-strong); }
+  .btn-ghost { background: transparent; color: var(--pc-text); border: 1px solid var(--pc-border); }
+
+  .pill { display:inline-block; padding: 4px 10px; border-radius: var(--pc-radius-pill); font-size: var(--pc-size-xs); font-weight: 600; text-transform: uppercase; letter-spacing: var(--pc-tracking-caps); }
+  .pill-base  { background: var(--pc-phase-base);  color: #0F1115; }
+  .pill-build { background: var(--pc-phase-build); color: #0F1115; }
+  .pill-peak  { background: var(--pc-phase-peak);  color: #FFFFFF; }
+  .pill-taper { background: var(--pc-phase-taper); color: #0F1115; }
+
+  .stat-grid { display:grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .stat { background: var(--pc-surface-elevated); padding: 18px; border-radius: var(--pc-radius-lg); }
+  .stat .lbl { font-size: var(--pc-size-xs); text-transform: uppercase; letter-spacing: var(--pc-tracking-caps); color: var(--pc-text-muted); }
+  .stat .val { font-family: var(--pc-font-display); font-weight: 700; font-size: var(--pc-size-2xl); margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .stat .dlt { font-size: var(--pc-size-sm); color: var(--pc-success); margin-top: 4px; }
+
+  /* Icons */
+  .icon-grid { display:grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+  .icon-cell { background: var(--pc-surface); border-radius: var(--pc-radius-md); padding: 22px 10px; text-align:center; }
+  .icon-cell img { width: 28px; height: 28px; color: var(--pc-text); display: block; margin: 0 auto 10px; }
+  .icon-cell .lbl { font-size: var(--pc-size-xs); color: var(--pc-text-muted); text-transform: uppercase; letter-spacing: var(--pc-tracking-caps); }
+
+  code { font-family: var(--pc-font-mono); font-size: 13px; background: var(--pc-surface-elevated); padding: 2px 6px; border-radius: 4px; color: var(--pc-text-muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <img src="logo/logo-mark.svg" alt="">
+  <div>
+    <div class="name">Personal Coach</div>
+    <div style="font-size: var(--pc-size-sm); color: var(--pc-text-muted);">Style Guide</div>
+  </div>
+  <div class="v">v1.0.0</div>
+</header>
+
+<!-- ============ LOGO ============ -->
+<section>
+  <span class="section-eyebrow">01 — Logo</span>
+  <h2 class="section-title">The mark, four ways</h2>
+  <p class="section-lead">The mark reads as <strong style="color:var(--pc-text)">progression</strong> — four ascending bars suggesting building weekly volume toward a peak. It works at 16 px and at billboard scale.</p>
+
+  <div class="logo-grid">
+    <div class="logo-cell"><img src="logo/logo-mark.svg" alt=""><span class="cap">logo-mark.svg</span></div>
+    <div class="logo-cell"><img src="logo/logo-horizontal.svg" alt=""><span class="cap">logo-horizontal.svg</span></div>
+    <div class="logo-cell"><img src="logo/logo-stacked.svg" alt=""><span class="cap">logo-stacked.svg</span></div>
+    <div class="logo-cell light"><img src="logo/logo-mark-black.svg" alt=""><span class="cap">logo-mark-black.svg</span></div>
+    <div class="logo-cell photo"><img src="logo/logo-mark-white.svg" alt=""><span class="cap">logo-mark-white.svg</span></div>
+    <div class="logo-cell light"><img src="logo/logo-wordmark.svg" alt=""><span class="cap">logo-wordmark.svg</span></div>
+  </div>
+</section>
+
+<!-- ============ COLOR ============ -->
+<section>
+  <span class="section-eyebrow">02 — Colour</span>
+  <h2 class="section-title">A two-tier system</h2>
+  <p class="section-lead">A raw palette of values, with semantic tokens layered on top. Always reference the semantic token in app code (<code>var(--pc-brand)</code>), never the raw palette.</p>
+
+  <div class="panel">
+    <div style="font-size: var(--pc-size-xs); text-transform: uppercase; letter-spacing: var(--pc-tracking-caps); color: var(--pc-text-muted); margin-bottom: 10px;">Brand</div>
+    <div class="swatch-row">
+      <div class="swatch" style="background:#FC4C02; color:#fff;"><span class="nm">Coach Orange</span><span class="hx">#FC4C02</span></div>
+      <div class="swatch" style="background:#D63F00; color:#fff;"><span class="nm">Deep</span><span class="hx">#D63F00</span></div>
+      <div class="swatch" style="background:#FF7F4A; color:#fff;"><span class="nm">Soft</span><span class="hx">#FF7F4A</span></div>
+      <div class="swatch" style="background:#FFF1EA; color:#0F1115;"><span class="nm">Mist</span><span class="hx">#FFF1EA</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div style="font-size: var(--pc-size-xs); text-transform: uppercase; letter-spacing: var(--pc-tracking-caps); color: var(--pc-text-muted); margin-bottom: 10px;">Ink scale</div>
+    <div class="swatch-row">
+      <div class="swatch" style="background:#0F1115; color:#fff; border:1px solid var(--pc-border);"><span class="nm">Ink 950</span><span class="hx">#0F1115</span></div>
+      <div class="swatch" style="background:#1A1D24; color:#fff;"><span class="nm">Ink 800</span><span class="hx">#1A1D24</span></div>
+      <div class="swatch" style="background:#2A2F3A; color:#fff;"><span class="nm">Ink 700</span><span class="hx">#2A2F3A</span></div>
+      <div class="swatch" style="background:#5A6478; color:#fff;"><span class="nm">Ink 500</span><span class="hx">#5A6478</span></div>
+      <div class="swatch" style="background:#8A93A6; color:#fff;"><span class="nm">Ink 400</span><span class="hx">#8A93A6</span></div>
+      <div class="swatch" style="background:#C7CCD8; color:#0F1115;"><span class="nm">Ink 200</span><span class="hx">#C7CCD8</span></div>
+      <div class="swatch" style="background:#E6E8EC; color:#0F1115;"><span class="nm">Ink 100</span><span class="hx">#E6E8EC</span></div>
+      <div class="swatch" style="background:#FFFFFF; color:#0F1115; border:1px solid var(--pc-border);"><span class="nm">Ink 000</span><span class="hx">#FFFFFF</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div style="font-size: var(--pc-size-xs); text-transform: uppercase; letter-spacing: var(--pc-tracking-caps); color: var(--pc-text-muted); margin-bottom: 10px;">Status &amp; phases</div>
+    <div class="swatch-row">
+      <div class="swatch" style="background:#22C55E; color:#0F1115;"><span class="nm">Success / Taper</span><span class="hx">#22C55E</span></div>
+      <div class="swatch" style="background:#F59E0B; color:#0F1115;"><span class="nm">Warning</span><span class="hx">#F59E0B</span></div>
+      <div class="swatch" style="background:#60A5FA; color:#0F1115;"><span class="nm">Info / Base</span><span class="hx">#60A5FA</span></div>
+      <div class="swatch" style="background:#A78BFA; color:#0F1115;"><span class="nm">Build</span><span class="hx">#A78BFA</span></div>
+      <div class="swatch" style="background:#EF4444; color:#fff;"><span class="nm">Danger</span><span class="hx">#EF4444</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TYPOGRAPHY ============ -->
+<section>
+  <span class="section-eyebrow">03 — Typography</span>
+  <h2 class="section-title">Space Grotesk + Inter</h2>
+  <p class="section-lead">Two families, both free, both legible at every size. Space Grotesk for personality (display, h1, big numbers). Inter for everything else.</p>
+
+  <div class="panel">
+    <div class="demo-row"><span class="meta">display · 56 · Grotesk 700</span><span style="font-family: var(--pc-font-display); font-weight: 700; font-size: 56px; letter-spacing: -0.02em;">Train smarter.</span></div>
+    <div class="demo-row"><span class="meta">h1 · 36 · Grotesk 700</span><span style="font-family: var(--pc-font-display); font-weight: 700; font-size: 36px; letter-spacing: -0.02em;">Build a training plan</span></div>
+    <div class="demo-row"><span class="meta">h2 · 22 · Grotesk 600</span><span style="font-family: var(--pc-font-display); font-weight: 600; font-size: 22px;">Week 4 — Build phase</span></div>
+    <div class="demo-row"><span class="meta">h3 · 18 · Inter 600</span><span style="font-family: var(--pc-font-ui); font-weight: 600; font-size: 18px;">Tomorrow's plan: recovery</span></div>
+    <div class="demo-row"><span class="meta">body · 16 · Inter 400</span><span style="font-family: var(--pc-font-ui); font-weight: 400; font-size: 16px;">Long session today. Tomorrow: easy 30–40 min in zone 1–2, or full rest.</span></div>
+    <div class="demo-row"><span class="meta">meta · 13 · Inter 400 muted</span><span style="font-family: var(--pc-font-ui); font-weight: 400; font-size: 13px; color: var(--pc-text-muted);">starts 2026-06-01 · 5×1 km @ 4:35/km</span></div>
+    <div class="demo-row"><span class="meta">eyebrow · 12 · 600 caps</span><span style="font-family: var(--pc-font-ui); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em;">4-week distance</span></div>
+    <div class="demo-row"><span class="meta">stat · 44 · Grotesk 700 tabular</span><span style="font-family: var(--pc-font-display); font-weight: 700; font-size: 44px; font-variant-numeric: tabular-nums;">128.4 km</span></div>
+  </div>
+</section>
+
+<!-- ============ ICONS ============ -->
+<section>
+  <span class="section-eyebrow">04 — Icons</span>
+  <h2 class="section-title">24-grid, 1.75 stroke</h2>
+  <p class="section-lead">Custom set tuned for the sports the app covers. All icons inherit <code>currentColor</code> — set the colour via CSS, not inside the SVG.</p>
+
+  <div class="icon-grid">
+    <div class="icon-cell"><img src="icons/run.svg" alt=""><span class="lbl">Run</span></div>
+    <div class="icon-cell"><img src="icons/bike.svg" alt=""><span class="lbl">Bike</span></div>
+    <div class="icon-cell"><img src="icons/swim.svg" alt=""><span class="lbl">Swim</span></div>
+    <div class="icon-cell"><img src="icons/tri.svg" alt=""><span class="lbl">Triathlon</span></div>
+    <div class="icon-cell"><img src="icons/nutrition.svg" alt=""><span class="lbl">Nutrition</span></div>
+    <div class="icon-cell"><img src="icons/strength.svg" alt=""><span class="lbl">Strength</span></div>
+    <div class="icon-cell"><img src="icons/rest.svg" alt=""><span class="lbl">Rest</span></div>
+    <div class="icon-cell"><img src="icons/trend-up.svg" alt=""><span class="lbl">Trending</span></div>
+    <div class="icon-cell"><img src="icons/heart-rate.svg" alt=""><span class="lbl">Heart rate</span></div>
+  </div>
+</section>
+
+<!-- ============ COMPONENTS ============ -->
+<section>
+  <span class="section-eyebrow">05 — Components</span>
+  <h2 class="section-title">Building blocks</h2>
+  <p class="section-lead">A few key patterns from the app, expressed in the design tokens.</p>
+
+  <div class="panel">
+    <div style="font-size: var(--pc-size-xs); text-transform: uppercase; letter-spacing: var(--pc-tracking-caps); color: var(--pc-text-muted); margin-bottom: 14px;">Buttons</div>
+    <button class="btn btn-primary">Generate plan</button>
+    <button class="btn btn-ghost" style="margin-left: 10px;">Cancel</button>
+  </div>
+
+  <div class="panel">
+    <div style="font-size: var(--pc-size-xs); text-transform: uppercase; letter-spacing: var(--pc-tracking-caps); color: var(--pc-text-muted); margin-bottom: 14px;">Phase pills</div>
+    <span class="pill pill-base">Base</span>
+    <span class="pill pill-build" style="margin-left:8px;">Build</span>
+    <span class="pill pill-peak"  style="margin-left:8px;">Peak</span>
+    <span class="pill pill-taper" style="margin-left:8px;">Taper</span>
+  </div>
+
+  <div class="panel">
+    <div style="font-size: var(--pc-size-xs); text-transform: uppercase; letter-spacing: var(--pc-tracking-caps); color: var(--pc-text-muted); margin-bottom: 14px;">Stat cards</div>
+    <div class="stat-grid">
+      <div class="stat">
+        <div class="lbl">4-week distance</div>
+        <div class="val">128.4 km</div>
+        <div class="dlt">+18 % vs prior block</div>
+      </div>
+      <div class="stat">
+        <div class="lbl">4-week time</div>
+        <div class="val">12.6 h</div>
+      </div>
+      <div class="stat">
+        <div class="lbl">Elevation</div>
+        <div class="val">1,240 m</div>
+      </div>
+      <div class="stat">
+        <div class="lbl">Rest days / 14</div>
+        <div class="val">4</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

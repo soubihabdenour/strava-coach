@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" role="img" aria-label="Personal Coach colour palette">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap');
+    .title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 28px; fill: #0F1115; }
+    .group { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; fill: #5A6478; }
+    .name  { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px; fill: #0F1115; }
+    .hex   { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 11px; fill: #5A6478; }
+    .light-name { fill: #FFFFFF; }
+    .light-hex  { fill: rgba(255,255,255,0.7); }
+  </style>
+
+  <rect width="960" height="480" fill="#F4F5F8"/>
+  <text x="48" y="56" class="title">Personal Coach — Colour System</text>
+
+  <!-- BRAND -->
+  <text x="48" y="100" class="group">Brand</text>
+  <g transform="translate(48,120)">
+    <rect width="180" height="100" rx="10" fill="#FC4C02"/>
+    <text x="14" y="74" class="name light-name">Coach Orange</text>
+    <text x="14" y="90" class="hex  light-hex">#FC4C02</text>
+  </g>
+  <g transform="translate(240,120)">
+    <rect width="120" height="100" rx="10" fill="#D63F00"/>
+    <text x="12" y="74" class="name light-name">Deep</text>
+    <text x="12" y="90" class="hex  light-hex">#D63F00</text>
+  </g>
+  <g transform="translate(372,120)">
+    <rect width="120" height="100" rx="10" fill="#FF7F4A"/>
+    <text x="12" y="74" class="name light-name">Soft</text>
+    <text x="12" y="90" class="hex  light-hex">#FF7F4A</text>
+  </g>
+  <g transform="translate(504,120)">
+    <rect width="120" height="100" rx="10" fill="#FFF1EA"/>
+    <text x="12" y="74" class="name">Mist</text>
+    <text x="12" y="90" class="hex">#FFF1EA</text>
+  </g>
+
+  <!-- INK -->
+  <text x="48" y="252" class="group">Ink (neutrals)</text>
+  <g transform="translate(48,272)">
+    <g><rect width="100" height="76" rx="8" fill="#0F1115"/>
+       <text x="10" y="50" class="name light-name">950</text>
+       <text x="10" y="66" class="hex  light-hex">#0F1115</text></g>
+    <g transform="translate(112,0)"><rect width="100" height="76" rx="8" fill="#1A1D24"/>
+       <text x="10" y="50" class="name light-name">800</text>
+       <text x="10" y="66" class="hex  light-hex">#1A1D24</text></g>
+    <g transform="translate(224,0)"><rect width="100" height="76" rx="8" fill="#2A2F3A"/>
+       <text x="10" y="50" class="name light-name">700</text>
+       <text x="10" y="66" class="hex  light-hex">#2A2F3A</text></g>
+    <g transform="translate(336,0)"><rect width="100" height="76" rx="8" fill="#5A6478"/>
+       <text x="10" y="50" class="name light-name">500</text>
+       <text x="10" y="66" class="hex  light-hex">#5A6478</text></g>
+    <g transform="translate(448,0)"><rect width="100" height="76" rx="8" fill="#8A93A6"/>
+       <text x="10" y="50" class="name light-name">400</text>
+       <text x="10" y="66" class="hex  light-hex">#8A93A6</text></g>
+    <g transform="translate(560,0)"><rect width="100" height="76" rx="8" fill="#C7CCD8"/>
+       <text x="10" y="50" class="name">200</text>
+       <text x="10" y="66" class="hex">#C7CCD8</text></g>
+    <g transform="translate(672,0)"><rect width="100" height="76" rx="8" fill="#E6E8EC"/>
+       <text x="10" y="50" class="name">100</text>
+       <text x="10" y="66" class="hex">#E6E8EC</text></g>
+    <g transform="translate(784,0)"><rect width="100" height="76" rx="8" fill="#FFFFFF" stroke="#E1E3EA"/>
+       <text x="10" y="50" class="name">000</text>
+       <text x="10" y="66" class="hex">#FFFFFF</text></g>
+  </g>
+
+  <!-- STATUS -->
+  <text x="48" y="388" class="group">Status &amp; phases</text>
+  <g transform="translate(48,408)">
+    <g><rect width="80" height="56" rx="8" fill="#22C55E"/>
+       <text x="8" y="36" class="name light-name">Success</text>
+       <text x="8" y="50" class="hex  light-hex">#22C55E</text></g>
+    <g transform="translate(92,0)"><rect width="80" height="56" rx="8" fill="#F59E0B"/>
+       <text x="8" y="36" class="name light-name">Warning</text>
+       <text x="8" y="50" class="hex  light-hex">#F59E0B</text></g>
+    <g transform="translate(184,0)"><rect width="80" height="56" rx="8" fill="#60A5FA"/>
+       <text x="8" y="36" class="name light-name">Info / Base</text>
+       <text x="8" y="50" class="hex  light-hex">#60A5FA</text></g>
+    <g transform="translate(276,0)"><rect width="80" height="56" rx="8" fill="#EF4444"/>
+       <text x="8" y="36" class="name light-name">Danger</text>
+       <text x="8" y="50" class="hex  light-hex">#EF4444</text></g>
+    <g transform="translate(368,0)"><rect width="80" height="56" rx="8" fill="#A78BFA"/>
+       <text x="8" y="36" class="name light-name">Build</text>
+       <text x="8" y="50" class="hex  light-hex">#A78BFA</text></g>
+    <g transform="translate(460,0)"><rect width="80" height="56" rx="8" fill="#FC4C02"/>
+       <text x="8" y="36" class="name light-name">Peak</text>
+       <text x="8" y="50" class="hex  light-hex">#FC4C02</text></g>
+    <g transform="translate(552,0)"><rect width="80" height="56" rx="8" fill="#22C55E"/>
+       <text x="8" y="36" class="name light-name">Taper</text>
+       <text x="8" y="50" class="hex  light-hex">#22C55E</text></g>
+  </g>
+</svg>

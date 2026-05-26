@@ -1,0 +1,53 @@
+/* Personal Coach — Typography
+   Two-family system: Space Grotesk (display/UI accents) + Inter (UI + body).
+   JetBrains Mono is optional for tabular numeric data (pace, distance).
+
+   Load via Google Fonts (subset to required weights only):
+*/
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+:root {
+  --pc-font-display: 'Space Grotesk', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --pc-font-ui:      'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --pc-font-mono:    'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  /* Type scale (1.250 — major third) */
+  --pc-size-xs:   12px;
+  --pc-size-sm:   13px;
+  --pc-size-base: 15px;
+  --pc-size-md:   16px;
+  --pc-size-lg:   18px;
+  --pc-size-xl:   22px;
+  --pc-size-2xl:  28px;
+  --pc-size-3xl:  36px;
+  --pc-size-4xl:  44px;
+  --pc-size-display: 56px;
+
+  /* Line heights */
+  --pc-leading-tight: 1.15;
+  --pc-leading-snug:  1.30;
+  --pc-leading-base:  1.50;
+  --pc-leading-loose: 1.70;
+
+  /* Weights */
+  --pc-weight-regular: 400;
+  --pc-weight-medium:  500;
+  --pc-weight-semibold:600;
+  --pc-weight-bold:    700;
+
+  /* Tracking */
+  --pc-tracking-tight:  -0.02em;  /* display headings */
+  --pc-tracking-normal: -0.005em; /* body */
+  --pc-tracking-wide:   0.05em;   /* eyebrows, labels */
+  --pc-tracking-caps:   0.12em;   /* all-caps small text */
+}
+
+/* Recommended usage */
+.pc-display { font-family: var(--pc-font-display); font-weight: 700; font-size: var(--pc-size-display); line-height: var(--pc-leading-tight); letter-spacing: var(--pc-tracking-tight); }
+.pc-h1      { font-family: var(--pc-font-display); font-weight: 700; font-size: var(--pc-size-3xl);     line-height: var(--pc-leading-tight); letter-spacing: var(--pc-tracking-tight); }
+.pc-h2      { font-family: var(--pc-font-display); font-weight: 600; font-size: var(--pc-size-xl);      line-height: var(--pc-leading-snug);  }
+.pc-h3      { font-family: var(--pc-font-ui);      font-weight: 600; font-size: var(--pc-size-lg);      line-height: var(--pc-leading-snug);  }
+.pc-body    { font-family: var(--pc-font-ui);      font-weight: 400; font-size: var(--pc-size-md);      line-height: var(--pc-leading-base);  }
+.pc-small   { font-family: var(--pc-font-ui);      font-weight: 400; font-size: var(--pc-size-sm);      line-height: var(--pc-leading-base);  }
+.pc-eyebrow { font-family: var(--pc-font-ui);      font-weight: 600; font-size: var(--pc-size-xs);      text-transform: uppercase; letter-spacing: var(--pc-tracking-caps); }
+.pc-data    { font-family: var(--pc-font-mono);    font-weight: 500; font-variant-numeric: tabular-nums; }

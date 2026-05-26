@@ -18,12 +18,12 @@ $dayColors = [
     'brick'   => '#7c3aed',
 ];
 $sportIcons = [
-    'run' => '🏃',
-    'bike' => '🚴',
-    'swim' => '🏊',
-    'multi' => '🔁',
-    'strength' => '💪',
-    'rest' => '😴',
+    'run' => 'run',
+    'bike' => 'bike',
+    'swim' => 'swim',
+    'multi' => 'tri',
+    'strength' => 'strength',
+    'rest' => 'rest',
 ];
 ?>
 <header>
@@ -75,7 +75,7 @@ $sportIcons = [
         <div style="display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
             <?php if (!empty($plan['paces']['run']['has_data'])): ?>
                 <div>
-                    <div style="font-weight:600; margin-bottom: 6px;">🏃 <?= e(t('zones.run')) ?></div>
+                    <div style="font-weight:600; margin-bottom: 6px; display:flex; align-items:center; gap:6px; color: var(--pc-text);"><?= icon('run') ?> <?= e(t('zones.run')) ?></div>
                     <?php foreach ($plan['paces']['run']['zones'] as $z => $range): ?>
                         <div style="display:flex; justify-content:space-between; font-size:13px; padding: 3px 0; color: var(--muted);">
                             <span><?= e($z) ?></span><span style="color: var(--text);"><?= e($range) ?></span>
@@ -85,7 +85,8 @@ $sportIcons = [
             <?php endif; ?>
             <?php if (!empty($plan['paces']['bike']['has_data'])): ?>
                 <div>
-                    <div style="font-weight:600; margin-bottom: 6px;">🚴 <?= e(t('zones.bike')) ?>
+                    <div style="font-weight:600; margin-bottom: 6px; display:flex; align-items:center; gap:6px; color: var(--pc-text);">
+                        <?= icon('bike') ?> <?= e(t('zones.bike')) ?>
                         <?php if (!empty($plan['paces']['bike']['ftp_estimate_w'])): ?>
                             <span style="color:var(--muted); font-weight:400; font-size:12px;">(FTP ≈ <?= $plan['paces']['bike']['ftp_estimate_w'] ?>W)</span>
                         <?php endif; ?>
@@ -99,7 +100,7 @@ $sportIcons = [
             <?php endif; ?>
             <?php if (!empty($plan['paces']['swim']['has_data'])): ?>
                 <div>
-                    <div style="font-weight:600; margin-bottom: 6px;">🏊 <?= e(t('zones.swim')) ?></div>
+                    <div style="font-weight:600; margin-bottom: 6px; display:flex; align-items:center; gap:6px; color: var(--pc-text);"><?= icon('swim') ?> <?= e(t('zones.swim')) ?></div>
                     <?php foreach ($plan['paces']['swim']['zones'] as $z => $range): ?>
                         <div style="display:flex; justify-content:space-between; font-size:13px; padding: 3px 0; color: var(--muted);">
                             <span><?= e($z) ?></span><span style="color: var(--text);"><?= e($range) ?></span>
@@ -160,7 +161,7 @@ if ($completion) {
                     <div class="day-name"><?= e(t('day.' . strtolower($day['day']))) ?></div>
                     <div>
                         <span class="day-type" style="background: <?= $dayColors[$day['type']] ?? '#3a3f4a' ?>;">
-                            <?= $sportIcons[$day['sport'] ?? 'run'] ?? '' ?> <?= e($day['title']) ?>
+                            <?= icon($sportIcons[$day['sport'] ?? 'run'] ?? 'run') ?><?= e($day['title']) ?>
                         </span>
                     </div>
                     <div class="day-desc"><?= e($day['desc']) ?></div>

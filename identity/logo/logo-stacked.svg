@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 170" role="img" aria-label="Personal Coach – stacked lockup">
+  <title>Personal Coach – stacked lockup</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&amp;display=swap');
+    .word { font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; font-weight: 700; letter-spacing: -0.01em; fill: #0F1115; text-anchor: middle; font-size: 26px; }
+  </style>
+  <!-- Mark centred -->
+  <g transform="translate(88,0)">
+    <rect width="64" height="64" rx="14" fill="#FC4C02"/>
+    <g fill="#FFFFFF">
+      <rect x="12"   y="40" width="9" height="14" rx="1.5"/>
+      <rect x="23.5" y="32" width="9" height="22" rx="1.5"/>
+      <rect x="35"   y="22" width="9" height="32" rx="1.5"/>
+      <rect x="46.5" y="12" width="9" height="42" rx="1.5"/>
+    </g>
+  </g>
+  <!-- Wordmark -->
+  <text class="word" x="120" y="104">PERSONAL</text>
+  <text class="word" x="120" y="136">COACH</text>
+  <line x1="100" y1="152" x2="140" y2="152" stroke="#FC4C02" stroke-width="2"/>
+</svg>

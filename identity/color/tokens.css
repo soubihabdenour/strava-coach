@@ -1,0 +1,80 @@
+/* Personal Coach — color tokens
+   Drop into a stylesheet and reference via var(--pc-*).
+   Two layers: raw palette (palette.*) + semantic tokens that map to them. */
+
+:root {
+  /* === Raw palette === */
+  --pc-palette-orange-500: #FC4C02;   /* primary brand */
+  --pc-palette-orange-600: #D63F00;   /* hover / pressed */
+  --pc-palette-orange-300: #FF7F4A;   /* tints */
+  --pc-palette-orange-100: #FFD6C2;
+  --pc-palette-orange-050: #FFF1EA;
+
+  --pc-palette-ink-950: #0F1115;      /* deepest bg */
+  --pc-palette-ink-900: #14171F;
+  --pc-palette-ink-800: #1A1D24;      /* card */
+  --pc-palette-ink-700: #2A2F3A;      /* border */
+  --pc-palette-ink-500: #5A6478;
+  --pc-palette-ink-400: #8A93A6;      /* muted text */
+  --pc-palette-ink-200: #C7CCD8;
+  --pc-palette-ink-100: #E6E8EC;      /* primary text on dark */
+  --pc-palette-ink-000: #FFFFFF;
+
+  --pc-palette-green-500: #22C55E;
+  --pc-palette-amber-500: #F59E0B;
+  --pc-palette-blue-500:  #60A5FA;
+  --pc-palette-violet-500:#A78BFA;
+  --pc-palette-red-500:   #EF4444;
+
+  /* === Semantic tokens === */
+  /* Brand */
+  --pc-brand: var(--pc-palette-orange-500);
+  --pc-brand-strong: var(--pc-palette-orange-600);
+  --pc-brand-soft: var(--pc-palette-orange-050);
+
+  /* Surfaces */
+  --pc-bg: var(--pc-palette-ink-950);
+  --pc-surface: var(--pc-palette-ink-800);
+  --pc-surface-elevated: var(--pc-palette-ink-900);
+  --pc-border: var(--pc-palette-ink-700);
+
+  /* Text */
+  --pc-text: var(--pc-palette-ink-100);
+  --pc-text-muted: var(--pc-palette-ink-400);
+  --pc-text-inverse: var(--pc-palette-ink-950);
+
+  /* Status */
+  --pc-success: var(--pc-palette-green-500);
+  --pc-warning: var(--pc-palette-amber-500);
+  --pc-info:    var(--pc-palette-blue-500);
+  --pc-danger:  var(--pc-palette-red-500);
+
+  /* Training-specific (used in phase pills, workout types) */
+  --pc-phase-base:  var(--pc-palette-blue-500);
+  --pc-phase-build: var(--pc-palette-violet-500);
+  --pc-phase-peak:  var(--pc-palette-orange-500);
+  --pc-phase-taper: var(--pc-palette-green-500);
+
+  /* Shadows */
+  --pc-shadow-sm: 0 1px 2px rgba(0,0,0,0.40);
+  --pc-shadow-md: 0 4px 12px rgba(0,0,0,0.45);
+  --pc-shadow-lg: 0 16px 40px rgba(0,0,0,0.55);
+
+  /* Radii */
+  --pc-radius-sm: 6px;
+  --pc-radius-md: 8px;
+  --pc-radius-lg: 12px;
+  --pc-radius-xl: 16px;
+  --pc-radius-pill: 999px;
+}
+
+/* Optional light theme — invert surfaces. Use [data-theme="light"] on <html>. */
+[data-theme="light"] {
+  --pc-bg: var(--pc-palette-ink-000);
+  --pc-surface: #F4F5F8;
+  --pc-surface-elevated: #FFFFFF;
+  --pc-border: #E1E3EA;
+  --pc-text: var(--pc-palette-ink-950);
+  --pc-text-muted: #5A6478;
+  --pc-text-inverse: #FFFFFF;
+}

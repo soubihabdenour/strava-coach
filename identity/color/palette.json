@@ -1,0 +1,32 @@
+{
+  "name": "Personal Coach",
+  "version": "1.0.0",
+  "brand": {
+    "primary": { "hex": "#FC4C02", "rgb": "252, 76, 2",  "hsl": "17 99% 50%",  "name": "Coach Orange" },
+    "strong":  { "hex": "#D63F00", "rgb": "214, 63, 0",  "hsl": "18 100% 42%", "name": "Coach Orange Deep" },
+    "tint":    { "hex": "#FF7F4A", "rgb": "255, 127, 74","hsl": "17 100% 65%", "name": "Coach Orange Soft" }
+  },
+  "ink": {
+    "950": { "hex": "#0F1115", "use": "page background" },
+    "900": { "hex": "#14171F", "use": "elevated surface" },
+    "800": { "hex": "#1A1D24", "use": "card / panel" },
+    "700": { "hex": "#2A2F3A", "use": "border / divider" },
+    "500": { "hex": "#5A6478", "use": "tertiary text" },
+    "400": { "hex": "#8A93A6", "use": "muted text / placeholder" },
+    "200": { "hex": "#C7CCD8", "use": "secondary text on dark" },
+    "100": { "hex": "#E6E8EC", "use": "primary text on dark" },
+    "000": { "hex": "#FFFFFF", "use": "highest-contrast text on brand" }
+  },
+  "status": {
+    "success": { "hex": "#22C55E", "use": "on-track completion, healthy" },
+    "warning": { "hex": "#F59E0B", "use": "soft alert, attention" },
+    "info":    { "hex": "#60A5FA", "use": "neutral notice" },
+    "danger":  { "hex": "#EF4444", "use": "errors, missed completion" }
+  },
+  "training_phases": {
+    "base":  { "hex": "#60A5FA", "label": "Base" },
+    "build": { "hex": "#A78BFA", "label": "Build" },
+    "peak":  { "hex": "#FC4C02", "label": "Peak" },
+    "taper": { "hex": "#22C55E", "label": "Taper" }
+  }
+}

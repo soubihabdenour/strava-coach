@@ -1,7 +1,10 @@
 <?php
 
 require_once __DIR__ . '/Config.php';
+require_once __DIR__ . '/Db.php';
+require_once __DIR__ . '/TokenStore.php';
 require_once __DIR__ . '/StravaClient.php';
+require_once __DIR__ . '/ActivityStore.php';
 require_once __DIR__ . '/i18n.php';
 require_once __DIR__ . '/Coach.php';
 require_once __DIR__ . '/PaceCalculator.php';
@@ -38,17 +41,69 @@ function gemini_client(): GeminiClient
     return new GeminiClient($apiKey, $model);
 }
 
+function token_store(): TokenStore
+{
+    static $store = null;
+    if ($store === null) {
+        $store = new TokenStore(Db::pdo());
+    }
+    return $store;
+}
+
+function activity_store(): ActivityStore
+{
+    static $store = null;
+    if ($store === null) {
+        $store = new ActivityStore(Db::pdo());
+    }
+    return $store;
+}
+
+/**
+ * Call a Strava API request on behalf of an athlete, refreshing the token
+ * proactively if it's near expiry and reactively on a 401.
+ * The callback receives a valid access token and returns whatever it likes.
+ */
+function strava_with_refresh(int $athleteId, callable $fn): mixed
+{
+    $store = token_store();
+    $token = $store->get($athleteId);
+    if (!$token) {
+        throw new RuntimeException("No Strava token on file for athlete {$athleteId}");
+    }
+
+    if ((int)$token['expires_at'] < time() + 60) {
+        $refreshed = strava_client()->refreshToken($token['refresh_token']);
+        $store->save($athleteId, $refreshed);
+        $token = $store->get($athleteId);
+    }
+
+    try {
+        return $fn($token['access_token']);
+    } catch (StravaUnauthorizedException $e) {
+        $refreshed = strava_client()->refreshToken($token['refresh_token']);
+        $store->save($athleteId, $refreshed);
+        return $fn($refreshed['access_token']);
+    }
+}
+
 function current_access_token(): ?string
 {
-    if (empty($_SESSION['token'])) return null;
-    $token = $_SESSION['token'];
-    if (($token['expires_at'] ?? 0) < time() + 60) {
+    $athleteId = isset($_SESSION['athlete_id']) ? (int)$_SESSION['athlete_id'] : 0;
+    if ($athleteId <= 0) return null;
+
+    $store = token_store();
+    $token = $store->get($athleteId);
+    if (!$token) return null;
+
+    if ((int)$token['expires_at'] < time() + 60) {
         try {
             $refreshed = strava_client()->refreshToken($token['refresh_token']);
-            $_SESSION['token'] = array_merge($token, $refreshed);
-            return $_SESSION['token']['access_token'];
+            $store->save($athleteId, $refreshed);
+            return $refreshed['access_token'];
         } catch (Throwable $e) {
-            unset($_SESSION['token'], $_SESSION['athlete']);
+            $store->delete($athleteId);
+            unset($_SESSION['athlete_id'], $_SESSION['athlete']);
             return null;
         }
     }

@@ -1,16 +1,36 @@
 <?php
 
+class StravaUnauthorizedException extends RuntimeException {}
+
+class StravaRateLimitException extends RuntimeException
+{
+    public function __construct(string $message, public readonly array $rateLimit = [])
+    {
+        parent::__construct($message);
+    }
+}
+
 class StravaClient
 {
     private const AUTH_URL = 'https://www.strava.com/oauth/authorize';
     private const TOKEN_URL = 'https://www.strava.com/oauth/token';
     private const API_BASE = 'https://www.strava.com/api/v3';
 
+    private array $lastRateLimit = [];
+
     public function __construct(
         private string $clientId,
         private string $clientSecret,
         private string $redirectUri,
     ) {}
+
+    /**
+     * @return array{limit?:array{short:int,long:int},usage?:array{short:int,long:int}}
+     */
+    public function lastRateLimit(): array
+    {
+        return $this->lastRateLimit;
+    }
 
     public function authorizationUrl(string $state): string
     {
@@ -89,11 +109,21 @@ class StravaClient
             CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $accessToken],
             CURLOPT_TIMEOUT => 30,
         ]);
+        $this->captureHeaders($ch);
         $response = curl_exec($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($response === false || $status >= 400) {
+        if ($response === false) {
+            throw new RuntimeException("Strava API network error on {$path}");
+        }
+        if ($status === 401) {
+            throw new StravaUnauthorizedException("Strava 401 on {$path}");
+        }
+        if ($status === 429) {
+            throw new StravaRateLimitException("Strava rate limit exceeded on {$path}", $this->lastRateLimit);
+        }
+        if ($status >= 400) {
             throw new RuntimeException("Strava API error ({$status}): {$response}");
         }
         return json_decode($response, true) ?? [];
@@ -108,13 +138,37 @@ class StravaClient
             CURLOPT_POSTFIELDS => http_build_query($fields),
             CURLOPT_TIMEOUT => 30,
         ]);
+        $this->captureHeaders($ch);
         $response = curl_exec($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($response === false || $status >= 400) {
+        if ($response === false) {
+            throw new RuntimeException("Strava token endpoint network error");
+        }
+        if ($status === 401) {
+            throw new StravaUnauthorizedException("Strava 401 on token endpoint");
+        }
+        if ($status === 429) {
+            throw new StravaRateLimitException("Strava token rate limit exceeded", $this->lastRateLimit);
+        }
+        if ($status >= 400) {
             throw new RuntimeException("Strava token endpoint error ({$status}): {$response}");
         }
         return json_decode($response, true) ?? [];
+    }
+
+    private function captureHeaders($ch): void
+    {
+        $this->lastRateLimit = [];
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($ch, $header) {
+            if (preg_match('/^x-ratelimit-(limit|usage):\s*(\d+),(\d+)/i', trim($header), $m)) {
+                $this->lastRateLimit[strtolower($m[1])] = [
+                    'short' => (int)$m[2],
+                    'long'  => (int)$m[3],
+                ];
+            }
+            return strlen($header);
+        });
     }
 }

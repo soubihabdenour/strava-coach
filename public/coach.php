@@ -1,11 +1,11 @@
 <?php
 require_once __DIR__ . '/../src/bootstrap.php';
 
-$token = current_access_token();
-if (!$token) {
+if (!current_access_token()) {
     header('Location: index.php');
     exit;
 }
+$athleteId = (int)$_SESSION['athlete_id'];
 
 $sport = $_GET['sport'] ?? 'run';
 if (!CoachAgent::isValid($sport)) {
@@ -27,7 +27,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
         try {
             $client = gemini_client();
-            $activities = strava_client()->fetchRecentActivities($token, 28);
+            $store = activity_store();
+            try { $store->syncIfStale($athleteId); } catch (Throwable $e) { error_log('Strava sync failed: ' . $e->getMessage()); }
+            $activities = $store->getRecent($athleteId, 28);
             $summary = (new Coach($activities))->summary();
             $systemPrompt = CoachAgent::buildSystemPrompt($sport, $summary, I18n::locale());
 

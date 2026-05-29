@@ -1,11 +1,13 @@
 <?php
 require_once __DIR__ . '/../src/bootstrap.php';
 
-$token = current_access_token();
-if (!$token) {
+if (!current_access_token()) {
     header('Location: index.php');
     exit;
 }
+$athleteId = (int)$_SESSION['athlete_id'];
+$store = activity_store();
+try { $store->syncIfStale($athleteId); } catch (Throwable $e) { error_log('Strava sync failed: ' . $e->getMessage()); }
 
 if (isset($_GET['reset'])) {
     unset($_SESSION['plan']);
@@ -41,7 +43,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
             exit('Goal date must be in the future.');
         }
 
-        $activities = strava_client()->fetchRecentActivities($token, 28);
+        $activities = $store->getRecent($athleteId, 28);
         $coach = new Coach($activities);
         $baseline = $coach->summary()['current_block']['distance_km'] / 4;
         $paces = PaceCalculator::compute($activities);
@@ -75,7 +77,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
     $plan = $_SESSION['plan'];
     try {
         $client = gemini_client();
-        $activities = strava_client()->fetchRecentActivities($token, 56);
+        $activities = $store->getRecent($athleteId, 56);
         $perWeek = CompletionTracker::perWeek($plan, $activities);
         $completion = CompletionTracker::forPrompt($perWeek);
 
@@ -109,7 +111,7 @@ if (!empty($_SESSION['plan'])) {
     $plan = $_SESSION['plan'];
     $completion = null;
     try {
-        $activities = strava_client()->fetchRecentActivities($token, 56);
+        $activities = $store->getRecent($athleteId, 56);
         $completion = CompletionTracker::perWeek($plan, $activities);
     } catch (Throwable) {
     }
@@ -118,7 +120,7 @@ if (!empty($_SESSION['plan'])) {
 }
 
 try {
-    $activities = strava_client()->fetchRecentActivities($token, 28);
+    $activities = $store->getRecent($athleteId, 28);
     $coach = new Coach($activities);
     $baseline = $coach->summary()['current_block']['distance_km'] / 4;
     $paces = PaceCalculator::compute($activities);

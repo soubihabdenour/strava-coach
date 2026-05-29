@@ -1,21 +1,21 @@
 <?php
 require_once __DIR__ . '/../src/bootstrap.php';
 
-$token = current_access_token();
-if (!$token) {
+if (!current_access_token()) {
     header('Location: index.php');
     exit;
 }
 
-$client = strava_client();
+$athleteId = (int)$_SESSION['athlete_id'];
+$athlete = $_SESSION['athlete'] ?? token_store()->getAthlete($athleteId);
 
+$store = activity_store();
 try {
-    $athlete = $_SESSION['athlete'] ?? $client->getAthlete($token);
-    $activities = $client->fetchRecentActivities($token, 84);
+    $store->syncIfStale($athleteId);
 } catch (Throwable $e) {
-    http_response_code(502);
-    exit('Strava API error: ' . e($e->getMessage()));
+    error_log('Strava sync failed: ' . $e->getMessage());
 }
+$activities = $store->getRecent($athleteId, 84);
 
 $coach = new Coach($activities);
 $summary = $coach->summary();

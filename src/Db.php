@@ -7,7 +7,19 @@ class Db
     public static function pdo(): PDO
     {
         if (self::$pdo === null) {
-            $path = __DIR__ . '/../storage/coach.db';
+            $dir = __DIR__ . '/../storage';
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+            if (!is_dir($dir) || !is_writable($dir)) {
+                $resolved = realpath($dir) ?: $dir;
+                throw new RuntimeException(
+                    "storage/ is not writable (path: {$resolved}). " .
+                    "Create it and give the web user write access — e.g. `mkdir -p storage && chmod 775 storage && chown :www-data storage` " .
+                    "(replace www-data with the correct group for your web server)."
+                );
+            }
+            $path = $dir . '/coach.db';
             $pdo = new PDO('sqlite:' . $path);
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -75,5 +87,24 @@ class Db
                 last_after_cursor INTEGER
             )
         ");
+
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS plans (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                athlete_id INTEGER NOT NULL REFERENCES athletes(id) ON DELETE CASCADE,
+                goal TEXT NOT NULL,
+                sport TEXT NOT NULL,
+                locale TEXT,
+                engine TEXT,
+                start_date TEXT NOT NULL,
+                goal_date TEXT NOT NULL,
+                weeks_total INTEGER NOT NULL,
+                plan_json TEXT NOT NULL,
+                is_active INTEGER NOT NULL DEFAULT 0,
+                created_at INTEGER NOT NULL,
+                archived_at INTEGER
+            )
+        ");
+        $pdo->exec("CREATE INDEX IF NOT EXISTS idx_plans_athlete_active ON plans(athlete_id, is_active)");
     }
 }

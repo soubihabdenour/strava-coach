@@ -7,10 +7,11 @@ if (!current_access_token()) {
 }
 $athleteId = (int)$_SESSION['athlete_id'];
 $store = activity_store();
+$plans = plan_store();
 try { $store->syncIfStale($athleteId); } catch (Throwable $e) { error_log('Strava sync failed: ' . $e->getMessage()); }
 
 if (isset($_GET['reset'])) {
-    unset($_SESSION['plan']);
+    $plans->archiveActive($athleteId);
     header('Location: plan.php');
     exit;
 }
@@ -63,7 +64,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
             $plan['paces'] = $paces;
             $plan['weekly_hours'] = $weeklyHours;
         }
-        $_SESSION['plan'] = $plan;
+        $plans->save($athleteId, $plan);
     } catch (Throwable $e) {
         http_response_code(500);
         exit('Could not generate plan: ' . e($e->getMessage()));
@@ -73,8 +74,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
     exit;
 }
 
-if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') === 'regenerate' && !empty($_SESSION['plan'])) {
-    $plan = $_SESSION['plan'];
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') === 'regenerate' && ($plan = $plans->getActive($athleteId))) {
     try {
         $client = gemini_client();
         $activities = $store->getRecent($athleteId, 56);
@@ -98,7 +98,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
             ],
             I18n::locale()
         );
-        $_SESSION['plan'] = $newPlan;
+        $plans->save($athleteId, $newPlan);
     } catch (Throwable $e) {
         http_response_code(500);
         exit('Could not regenerate plan: ' . e($e->getMessage()));
@@ -107,8 +107,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
     exit;
 }
 
-if (!empty($_SESSION['plan'])) {
-    $plan = $_SESSION['plan'];
+if ($plan = $plans->getActive($athleteId)) {
     $completion = null;
     try {
         $activities = $store->getRecent($athleteId, 56);

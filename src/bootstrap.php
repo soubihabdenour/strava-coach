@@ -13,6 +13,8 @@ require_once __DIR__ . '/GeminiClient.php';
 require_once __DIR__ . '/AiPlanGenerator.php';
 require_once __DIR__ . '/CompletionTracker.php';
 require_once __DIR__ . '/CoachAgent.php';
+require_once __DIR__ . '/PlanStore.php';
+require_once __DIR__ . '/PlanProgress.php';
 
 Config::load(__DIR__ . '/../.env');
 
@@ -55,6 +57,15 @@ function activity_store(): ActivityStore
     static $store = null;
     if ($store === null) {
         $store = new ActivityStore(Db::pdo());
+    }
+    return $store;
+}
+
+function plan_store(): PlanStore
+{
+    static $store = null;
+    if ($store === null) {
+        $store = new PlanStore(Db::pdo());
     }
     return $store;
 }

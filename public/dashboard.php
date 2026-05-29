@@ -21,8 +21,17 @@ $coach = new Coach($activities);
 $summary = $coach->summary();
 $tips = $coach->recommendations();
 
+$plan = plan_store()->getActive($athleteId);
+$todayCtx = $plan ? PlanProgress::todayContext($plan) : null;
+$todayMatch = ($todayCtx && $todayCtx['state'] === 'active')
+    ? PlanProgress::matchActivity($todayCtx['day'], $todayCtx['today'], $activities)
+    : null;
+
 render('dashboard', [
     'athlete' => $athlete,
     'summary' => $summary,
     'tips' => $tips,
+    'plan' => $plan,
+    'todayCtx' => $todayCtx,
+    'todayMatch' => $todayMatch,
 ]);

@@ -2,10 +2,17 @@
 /** @var array $athlete */
 /** @var array $summary */
 /** @var array $tips */
+/** @var ?array $plan */
+/** @var ?array $todayCtx */
+/** @var ?array $todayMatch */
 $weeks = $summary['weeks'];
 $maxKm = max(0.1, max(array_column($weeks, 'distance_km')));
 $delta = $summary['volume_change_pct'];
 $current = $summary['current_block'];
+
+$phaseColors = ['base' => '#60a5fa', 'build' => '#a78bfa', 'peak' => '#fc4c02', 'taper' => '#22c55e'];
+$dayColors = ['rest' => '#3a3f4a', 'easy' => '#4b5563', 'long' => '#1e40af', 'tempo' => '#b45309', 'quality' => '#7c2d12', 'race' => '#fc4c02', 'brick' => '#7c3aed'];
+$sportIcons = ['run' => 'run', 'bike' => 'bike', 'swim' => 'swim', 'multi' => 'tri', 'strength' => 'strength', 'rest' => 'rest'];
 ?>
 <header>
     <h1><?= t('dashboard.greeting', e($athlete['firstname'] ?? 'athlete')) ?></h1>
@@ -39,6 +46,74 @@ $current = $summary['current_block'];
         <div class="value"><?= $summary['rest_days_last_14'] ?></div>
     </div>
 </div>
+
+<?php if ($plan && $todayCtx && $todayCtx['state'] === 'active'):
+    $tDay = $todayCtx['day'];
+    $tWeek = $todayCtx['week'];
+    $tDateLabel = (new DateTimeImmutable($todayCtx['today']))->format('D, M j');
+    $isRest = ($tDay['sport'] ?? 'rest') === 'rest';
+    $isUnattributed = in_array($tDay['sport'] ?? '', ['strength', 'multi'], true);
+?>
+<div class="card" style="border-left: 4px solid var(--accent);">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
+        <h2 style="margin: 0;">
+            <?= e(t('dashboard.today.title', $tDateLabel)) ?>
+        </h2>
+        <div style="display:flex; align-items:center; gap: 10px; font-size: 13px; color: var(--muted); flex-wrap: wrap;">
+            <span><?= e(t('dashboard.today.week_progress', $todayCtx['week_index'], $todayCtx['weeks_total'])) ?></span>
+            <span class="phase-pill" style="background: <?= $phaseColors[$tWeek['phase']] ?? '#3a3f4a' ?>;">
+                <?= e(t('phase.' . $tWeek['phase'])) ?>
+            </span>
+            <span>
+                <?= $todayCtx['days_to_goal'] === 0
+                    ? e(t('dashboard.today.goal_day'))
+                    : e(t('dashboard.today.days_to_goal', $todayCtx['days_to_goal'])) ?>
+            </span>
+        </div>
+    </div>
+    <div style="display:flex; align-items:center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;">
+        <span class="day-type" style="background: <?= $dayColors[$tDay['type']] ?? '#3a3f4a' ?>;">
+            <?= icon($sportIcons[$tDay['sport']] ?? 'run') ?><?= e($tDay['title']) ?>
+        </span>
+        <?php if (($tDay['distance_km'] ?? 0) > 0): ?>
+            <span style="color: var(--muted);"><?= e(t('dashboard.unit.km', number_format($tDay['distance_km'], 1))) ?></span>
+        <?php endif; ?>
+    </div>
+    <p style="margin: 0 0 12px;"><?= e($tDay['desc']) ?></p>
+    <?php if ($todayMatch): ?>
+        <div style="color: var(--good); font-size: 13px;">
+            <?= e(t('dashboard.today.matched',
+                $todayMatch['name'] ?? '—',
+                number_format(($todayMatch['distance'] ?? 0) / 1000, 1)
+            )) ?>
+            <a class="muted" href="https://www.strava.com/activities/<?= (int)($todayMatch['id'] ?? 0) ?>" target="_blank" rel="noopener" style="margin-left: 8px;">↗ Strava</a>
+        </div>
+    <?php elseif ($isRest): ?>
+        <div style="color: var(--muted); font-size: 13px;"><?= e(t('dashboard.today.rest_note')) ?></div>
+    <?php elseif ($isUnattributed): ?>
+        <div style="color: var(--muted); font-size: 13px;"><?= e(t('dashboard.today.manual_note')) ?></div>
+    <?php else: ?>
+        <div style="color: var(--muted); font-size: 13px;"><?= e(t('dashboard.today.pending')) ?></div>
+    <?php endif; ?>
+</div>
+<?php elseif ($plan && $todayCtx && $todayCtx['state'] === 'pre_start'): ?>
+<div class="card" style="border-left: 4px solid var(--info);">
+    <h2 style="margin: 0 0 6px;"><?= e(t('dashboard.today.upcoming_title')) ?></h2>
+    <p style="color: var(--muted); margin: 0;"><?= e(t('dashboard.today.upcoming_body', $todayCtx['starts'])) ?></p>
+</div>
+<?php elseif ($plan && $todayCtx && $todayCtx['state'] === 'ended'): ?>
+<div class="card" style="border-left: 4px solid var(--warn);">
+    <h2 style="margin: 0 0 6px;"><?= e(t('dashboard.today.ended_title')) ?></h2>
+    <p style="color: var(--muted); margin: 0 0 12px;"><?= e(t('dashboard.today.ended_body', $todayCtx['ended'])) ?></p>
+    <a class="btn" href="plan.php?reset=1" style="padding: 8px 14px; font-size: 14px;"><?= e(t('dashboard.today.no_plan_cta')) ?></a>
+</div>
+<?php else: ?>
+<div class="card">
+    <h2 style="margin: 0 0 6px;"><?= e(t('dashboard.today.no_plan_title')) ?></h2>
+    <p style="color: var(--muted); margin: 0 0 12px;"><?= e(t('dashboard.today.no_plan_body')) ?></p>
+    <a class="btn" href="plan.php" style="padding: 8px 14px; font-size: 14px;"><?= e(t('dashboard.today.no_plan_cta')) ?></a>
+</div>
+<?php endif; ?>
 
 <div class="card">
     <h2><?= e(t('dashboard.weekly_chart')) ?></h2>

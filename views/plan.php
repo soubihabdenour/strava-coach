@@ -2,6 +2,7 @@
 /** @var array $plan */
 /** @var ?array $completion */
 /** @var bool $aiAvailable */
+/** @var ?string $feedUrl */
 $phaseColors = [
     'base'  => '#60a5fa',
     'build' => '#a78bfa',
@@ -37,7 +38,6 @@ $sportIcons = [
                 </button>
             </form>
         <?php endif; ?>
-        <a class="muted" href="plan.ics.php" style="margin-right: 16px;" title="<?= e(t('plan.export.hint')) ?>"><?= e(t('plan.export.ics')) ?></a>
         <a class="muted" href="plan.php?reset=1" style="margin-right: 16px;"><?= e(t('plan.new')) ?></a>
         <a class="muted" href="dashboard.php"><?= e(t('plan.back_dashboard')) ?></a>
     </div>
@@ -69,6 +69,45 @@ $sportIcons = [
         </div>
     </div>
 </div>
+
+<?php if (!empty($feedUrl)):
+    $webcalUrl = preg_replace('#^https?://#', 'webcal://', $feedUrl);
+?>
+<div class="card">
+    <h2 style="margin: 0 0 6px;"><?= e(t('plan.calendar.title')) ?></h2>
+    <p style="color: var(--muted); margin: 0 0 14px; font-size: 14px;"><?= e(t('plan.calendar.body')) ?></p>
+
+    <label class="field" style="font-size: 13px;"><?= e(t('plan.calendar.subscribe_label')) ?></label>
+    <div style="display:flex; gap: 8px; align-items: stretch; flex-wrap: wrap;">
+        <input id="feedUrlInput" class="input" type="text" readonly value="<?= e($feedUrl) ?>"
+               style="flex: 1 1 280px; min-width: 0; font-family: ui-monospace, monospace; font-size: 12px;"
+               onclick="this.select()">
+        <button type="button" class="btn" onclick="navigator.clipboard.writeText(document.getElementById('feedUrlInput').value); this.textContent='<?= e(t('plan.calendar.copied')) ?>'; setTimeout(()=>{this.textContent='<?= e(t('plan.calendar.copy')) ?>'}, 1800);"
+                style="padding: 8px 14px; font-size: 13px; border: none; cursor: pointer; white-space: nowrap;">
+            <?= e(t('plan.calendar.copy')) ?>
+        </button>
+        <a class="btn" href="<?= e($webcalUrl) ?>"
+           style="padding: 8px 14px; font-size: 13px; white-space: nowrap; text-decoration: none;">
+            <?= e(t('plan.calendar.open_in_app')) ?>
+        </a>
+    </div>
+    <div style="color: var(--muted); font-size: 12px; margin-top: 6px;">
+        <?= e(t('plan.calendar.subscribe_hint')) ?>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap: 12px; margin-top: 16px; padding-top: 12px; border-top: 1px solid #222; flex-wrap: wrap;">
+        <a href="plan.ics.php" class="muted" style="font-size: 13px;">
+            <?= e(t('plan.calendar.download_one_time')) ?>
+        </a>
+        <form method="post" action="plan.php" style="margin:0;" onsubmit="return confirm('<?= e(t('plan.calendar.rotate_confirm')) ?>');">
+            <input type="hidden" name="action" value="rotate_calendar_token">
+            <button type="submit" class="muted" style="background:none; border:none; color: var(--muted); cursor:pointer; font-size: 12px; text-decoration: underline;">
+                <?= e(t('plan.calendar.rotate')) ?>
+            </button>
+        </form>
+    </div>
+</div>
+<?php endif; ?>
 
 <?php if (!empty($plan['paces']['run']['has_data']) || !empty($plan['paces']['bike']['has_data']) || !empty($plan['paces']['swim']['has_data'])): ?>
     <div class="card">

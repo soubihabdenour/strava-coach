@@ -45,6 +45,15 @@ class Db
             )
         ");
 
+        // Idempotent column add for the calendar subscription token.
+        $cols = $pdo->query("PRAGMA table_info(athletes)")->fetchAll();
+        $hasCalToken = false;
+        foreach ($cols as $c) if (($c['name'] ?? '') === 'calendar_token') { $hasCalToken = true; break; }
+        if (!$hasCalToken) {
+            $pdo->exec("ALTER TABLE athletes ADD COLUMN calendar_token TEXT");
+            $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_athletes_calendar_token ON athletes(calendar_token)");
+        }
+
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS tokens (
                 athlete_id INTEGER PRIMARY KEY REFERENCES athletes(id) ON DELETE CASCADE,

@@ -89,4 +89,43 @@ class TokenStore
         $row = $stmt->fetch();
         return $row ?: null;
     }
+
+    /**
+     * Return the athlete's calendar subscription token, minting one on first call.
+     */
+    public function ensureCalendarToken(int $athleteId): string
+    {
+        $stmt = $this->pdo->prepare('SELECT calendar_token FROM athletes WHERE id = :id');
+        $stmt->execute([':id' => $athleteId]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            throw new RuntimeException("No athlete {$athleteId}");
+        }
+        $existing = $row['calendar_token'] ?? null;
+        if (is_string($existing) && $existing !== '') {
+            return $existing;
+        }
+        return $this->rotateCalendarToken($athleteId);
+    }
+
+    /**
+     * Replace the athlete's calendar token, invalidating any previously-shared URL.
+     */
+    public function rotateCalendarToken(int $athleteId): string
+    {
+        $token = bin2hex(random_bytes(24));
+        $stmt = $this->pdo->prepare(
+            'UPDATE athletes SET calendar_token = :t, updated_at = :u WHERE id = :id'
+        );
+        $stmt->execute([':t' => $token, ':u' => time(), ':id' => $athleteId]);
+        return $token;
+    }
+
+    public function athleteIdByCalendarToken(string $token): ?int
+    {
+        $stmt = $this->pdo->prepare('SELECT id FROM athletes WHERE calendar_token = :t LIMIT 1');
+        $stmt->execute([':t' => $token]);
+        $row = $stmt->fetch();
+        return $row ? (int)$row['id'] : null;
+    }
 }

@@ -16,6 +16,12 @@ if (isset($_GET['reset'])) {
     exit;
 }
 
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') === 'rotate_calendar_token') {
+    token_store()->rotateCalendarToken($athleteId);
+    header('Location: plan.php');
+    exit;
+}
+
 $apiKey = Config::get('GEMINI_API_KEY');
 $aiAvailable = !empty($apiKey);
 
@@ -143,7 +149,19 @@ if ($plan = $plans->getActive($athleteId)) {
         $completion = CompletionTracker::perWeek($plan, $activities);
     } catch (Throwable) {
     }
-    render('plan', ['plan' => $plan, 'completion' => $completion, 'aiAvailable' => $aiAvailable]);
+    $calendarToken = token_store()->ensureCalendarToken($athleteId);
+    $feedUrl = sprintf(
+        '%s://%s/plan-feed.php?t=%s',
+        (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
+        $_SERVER['HTTP_HOST'] ?? 'localhost',
+        $calendarToken
+    );
+    render('plan', [
+        'plan' => $plan,
+        'completion' => $completion,
+        'aiAvailable' => $aiAvailable,
+        'feedUrl' => $feedUrl,
+    ]);
     exit;
 }
 

@@ -8,6 +8,24 @@ class IcsExporter
      * Render a plan as an RFC 5545 iCalendar file (all-day events, one per scheduled workout).
      * Rest days are skipped so calendars stay scannable.
      */
+    /**
+     * Minimal valid VCALENDAR with no events — used by the subscription feed
+     * when there's no active plan, so calendar apps cleanly remove prior events.
+     */
+    public static function emptyCalendar(string $label = 'Training plan'): string
+    {
+        $lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Strava Personal Coach//Plan Export//EN',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH',
+            'X-WR-CALNAME:' . self::escapeText($label),
+            'END:VCALENDAR',
+        ];
+        return implode("\r\n", $lines) . "\r\n";
+    }
+
     public static function fromPlan(array $plan, string $athleteName = 'Athlete'): string
     {
         $now = gmdate('Ymd\THis\Z');

@@ -105,6 +105,8 @@ return [
     'plan.locale_hint' => 'Ce plan a été généré dans une autre langue. Clique sur « Nouveau plan » pour le régénérer dans la langue actuelle.',
     'plan.engine' => 'Moteur',
     'plan.regenerate' => '↻ Recalibrer depuis ta réalisation',
+    'plan.export.ics' => '📅 Ajouter au calendrier',
+    'plan.export.hint' => 'Télécharge un fichier .ics — compatible Google, Apple et Outlook.',
     'plan.completion' => 'Réalisation hebdo',
     'plan.zones_title' => 'Tes zones d\'entraînement (depuis Strava)',
     'zones.run' => 'Allure course',

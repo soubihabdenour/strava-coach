@@ -68,6 +68,8 @@ return [
     'plan.locale_hint' => 'This plan was generated in another language. Click "New plan" to regenerate it in the current language.',
     'plan.engine' => 'Engine',
     'plan.regenerate' => '↻ Re-scale from completion',
+    'plan.export.ics' => '📅 Add to calendar',
+    'plan.export.hint' => 'Download an .ics file — works with Google, Apple, and Outlook calendars.',
     'plan.completion' => 'Week completion',
     'plan.zones_title' => 'Your training zones (from Strava)',
     'zones.run' => 'Run pace',

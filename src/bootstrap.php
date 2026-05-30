@@ -15,6 +15,7 @@ require_once __DIR__ . '/CompletionTracker.php';
 require_once __DIR__ . '/CoachAgent.php';
 require_once __DIR__ . '/PlanStore.php';
 require_once __DIR__ . '/PlanProgress.php';
+require_once __DIR__ . '/IcsExporter.php';
 
 Config::load(__DIR__ . '/../.env');
 

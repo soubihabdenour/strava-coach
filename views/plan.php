@@ -37,6 +37,7 @@ $sportIcons = [
                 </button>
             </form>
         <?php endif; ?>
+        <a class="muted" href="plan.ics.php" style="margin-right: 16px;" title="<?= e(t('plan.export.hint')) ?>"><?= e(t('plan.export.ics')) ?></a>
         <a class="muted" href="plan.php?reset=1" style="margin-right: 16px;"><?= e(t('plan.new')) ?></a>
         <a class="muted" href="dashboard.php"><?= e(t('plan.back_dashboard')) ?></a>
     </div>

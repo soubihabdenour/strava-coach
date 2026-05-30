@@ -26,7 +26,7 @@ class GeminiClient
      * Generate a single JSON response matching the given schema.
      * Returns the decoded JSON as an associative array.
      */
-    public function generateJson(string $systemPrompt, string $userPrompt, array $schema, int $maxOutputTokens = 8192): array
+    public function generateJson(string $systemPrompt, string $userPrompt, array $schema, int $maxOutputTokens = 32768): array
     {
         $raw = $this->request(
             $systemPrompt,
@@ -41,7 +41,10 @@ class GeminiClient
 
         $decoded = json_decode($raw, true);
         if (!is_array($decoded)) {
-            throw new RuntimeException('Gemini returned invalid JSON: ' . substr($raw, 0, 200));
+            $len = strlen($raw);
+            $head = substr($raw, 0, 200);
+            $tail = $len > 400 ? ' …(trimmed)… ' . substr($raw, -200) : '';
+            throw new RuntimeException("Gemini returned invalid JSON ({$len} chars). Head: {$head}{$tail}");
         }
         return $decoded;
     }
@@ -88,9 +91,16 @@ class GeminiClient
         }
 
         $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+        $finish = $data['candidates'][0]['finishReason'] ?? null;
+
         if ($text === '') {
-            $reason = $data['candidates'][0]['finishReason'] ?? 'unknown';
-            throw new RuntimeException("Gemini returned no text (finish: {$reason}).");
+            throw new RuntimeException('Gemini returned no text (finish: ' . ($finish ?? 'unknown') . ').');
+        }
+        if ($finish === 'MAX_TOKENS' || $finish === 'LENGTH') {
+            throw new RuntimeException(
+                "Gemini output was cut off at the token limit (finish: {$finish}, " . strlen($text) . ' chars produced). ' .
+                'Raise maxOutputTokens, shorten the plan, or use a model with a larger output window.'
+            );
         }
         return $text;
     }

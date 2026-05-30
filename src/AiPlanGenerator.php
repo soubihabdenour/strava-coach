@@ -38,7 +38,10 @@ class AiPlanGenerator
         $userPrompt = $this->userPrompt($goal, $cfg, $monday, $goalDate, $weeks, $constraints, $locale);
         $schema = $this->responseSchema($weeks);
 
-        $response = $this->client->generateJson($systemPrompt, $userPrompt, $schema);
+        // Scale output budget to plan length — each week is ~1800 tokens with
+        // structured_steps + purpose/rpe/fueling, plus headroom for verbose models.
+        $tokens = min(65536, max(16384, $weeks * 2800));
+        $response = $this->client->generateJson($systemPrompt, $userPrompt, $schema, $tokens);
 
         $weeksOut = $this->normaliseWeeks($response['weeks'] ?? [], $monday);
 

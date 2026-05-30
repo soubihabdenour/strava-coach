@@ -53,6 +53,12 @@ return [
     'dashboard.today.upcoming_body' => 'Ton plan commence le %s. Reste détendu d\'ici là.',
     'dashboard.today.ended_title' => 'Plan terminé',
     'dashboard.today.ended_body' => 'Ton plan s\'est terminé le %s. Il est temps d\'en construire un nouveau.',
+    'dashboard.today.swapped_from' => '↔ Permuté avec %s — voici la séance de ce jour-là.',
+    'dashboard.today.manual_done' => '✓ Marquée faite',
+    'dashboard.today.manual_skipped' => '⏭ Sautée',
+
+    'dashboard.thisweek.title' => 'Cette semaine',
+    'dashboard.thisweek.open_full' => 'Ouvrir le plan complet →',
 
     'plan.day.purpose' => 'Objectif',
     'plan.day.rpe' => 'Effort',
@@ -62,6 +68,18 @@ return [
     'plan.step.interval' => 'Intervalle',
     'plan.step.cooldown' => 'Retour au calme',
     'plan.step.recovery_inline' => 'récup : %s',
+
+    'plan.day.swapped_from' => 'était %s',
+    'plan.status.auto_matched' => 'Enregistrée via Strava',
+    'plan.status.manual_done' => 'Marquée faite',
+    'plan.status.manual_skipped' => 'Sautée',
+    'plan.status.matched_inline' => '✓ Enregistrée — %s, %s km',
+
+    'plan.action.mark_done' => '✓ Marquer faite',
+    'plan.action.skip' => '⏭ Sauter',
+    'plan.action.undo' => '↺ Annuler',
+    'plan.action.swap' => '↔ Permuter',
+    'plan.action.unswap' => '↔ Annuler permutation',
 
     'plan_form.adv.title' => '⚙ Options avancées',
     'plan_form.adv.hint' => 'Optionnel — ajuste le plan à ton planning, ton matériel et tes objectifs de course.',

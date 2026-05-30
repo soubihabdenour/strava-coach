@@ -3,6 +3,8 @@
 /** @var ?array $completion */
 /** @var bool $aiAvailable */
 /** @var ?string $feedUrl */
+/** @var array $activities */
+/** @var array $actionsMap */
 $phaseColors = [
     'base'  => '#60a5fa',
     'build' => '#a78bfa',
@@ -195,18 +197,56 @@ if ($completion) {
             </div>
         <?php endif; ?>
 
+        <?php
+            // Index this week's days by code so we can apply swaps and iterate in fixed DOW order.
+            $daysByCode = [];
+            foreach ($week['days'] as $_d) { $daysByCode[$_d['day'] ?? ''] = $_d; }
+            $weekMonday = new DateTimeImmutable($week['start']);
+            $dowOrder = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+            $weekIdx = (int)($week['index'] ?? 0);
+        ?>
         <div style="display: grid; gap: 8px;">
-            <?php foreach ($week['days'] as $day): ?>
-                <?php
-                    $hasSteps = !empty($day['structured_steps']);
-                    $hasMeta = !empty($day['purpose']) || !empty($day['rpe']) || !empty($day['fueling']);
-                ?>
+            <?php foreach ($dowOrder as $offset => $dow):
+                $action = $actionsMap[$weekIdx . ':' . $dow] ?? null;
+                $original = $daysByCode[$dow] ?? null;
+                if (!$original) continue;
+
+                $day = $original;
+                $swappedFrom = null;
+                if ($action && !empty($action['swap_with']) && isset($daysByCode[$action['swap_with']])) {
+                    $day = $daysByCode[$action['swap_with']];
+                    $day['day'] = $dow;
+                    $swappedFrom = $action['swap_with'];
+                }
+
+                $dayDate = $weekMonday->modify('+' . $offset . ' days')->format('Y-m-d');
+                $matchInfo = PlanProgress::matchActivityStatus($day, $dayDate, $activities, $action);
+                $matchStatus = $matchInfo['status'];
+                $matchAct = $matchInfo['activity'];
+
+                $hasSteps = !empty($day['structured_steps']);
+                $hasMeta = !empty($day['purpose']) || !empty($day['rpe']) || !empty($day['fueling']);
+                $statusBadge = match ($matchStatus) {
+                    'auto_matched'   => ['✓', 'var(--good)', t('plan.status.auto_matched')],
+                    'manual_done'    => ['✓', 'var(--good)', t('plan.status.manual_done')],
+                    'manual_skipped' => ['⏭', 'var(--muted)', t('plan.status.manual_skipped')],
+                    default          => null,
+                };
+            ?>
                 <div class="plan-day">
-                    <div class="day-name"><?= e(t('day.' . strtolower($day['day']))) ?></div>
+                    <div class="day-name"><?= e(t('day.' . strtolower($dow))) ?></div>
                     <div>
                         <span class="day-type" style="background: <?= $dayColors[$day['type']] ?? '#3a3f4a' ?>;">
                             <?= icon($sportIcons[$day['sport'] ?? 'run'] ?? 'run') ?><?= e($day['title']) ?>
                         </span>
+                        <?php if ($statusBadge): ?>
+                            <span style="margin-left: 6px; font-size: 12px; color: <?= $statusBadge[1] ?>;" title="<?= e($statusBadge[2]) ?>">
+                                <?= $statusBadge[0] ?>
+                            </span>
+                        <?php endif; ?>
+                        <?php if ($swappedFrom): ?>
+                            <span style="margin-left: 6px; font-size: 11px; color: var(--accent);">↔ <?= e(t('plan.day.swapped_from', t('day.' . strtolower($swappedFrom)))) ?></span>
+                        <?php endif; ?>
                         <?php if (($day['distance_km'] ?? 0) > 0 || !empty($day['duration_min'])): ?>
                             <span style="color: var(--muted); margin-left: 8px; font-size: 13px;">
                                 <?php if (($day['distance_km'] ?? 0) > 0): ?><?= e(t('dashboard.unit.km', number_format($day['distance_km'], 1))) ?><?php endif; ?>
@@ -270,6 +310,76 @@ if ($completion) {
                             <div style="display:flex; align-items:center; gap: 6px; padding: 6px 10px; background: rgba(252,76,2,0.08); border-radius: 6px; font-size: 12px; color: var(--text); margin-top: 4px;">
                                 <?= icon('nutrition', 'icon icon-sm') ?>
                                 <span><strong><?= e(t('plan.day.fueling')) ?>:</strong> <?= e($day['fueling']) ?></span>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if ($matchStatus === 'auto_matched' && $matchAct): ?>
+                            <div style="color: var(--good); font-size: 12px; margin-top: 6px;">
+                                <?= e(t('plan.status.matched_inline',
+                                    $matchAct['name'] ?? '—',
+                                    number_format(($matchAct['distance'] ?? 0) / 1000, 1)
+                                )) ?>
+                                <a class="muted" href="https://www.strava.com/activities/<?= (int)($matchAct['id'] ?? 0) ?>" target="_blank" rel="noopener" style="margin-left: 6px;">↗ Strava</a>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (($day['sport'] ?? 'rest') !== 'rest'): ?>
+                            <div style="display:flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid #1f1f1f;">
+                                <?php if ($matchStatus === 'manual_done' || $matchStatus === 'manual_skipped'): ?>
+                                    <form method="post" action="plan.php" style="margin:0;">
+                                        <input type="hidden" name="day_action" value="clear_status">
+                                        <input type="hidden" name="week_index" value="<?= $weekIdx ?>">
+                                        <input type="hidden" name="day" value="<?= e($dow) ?>">
+                                        <button type="submit" class="muted" style="background:none; border:1px solid #333; color: var(--muted); cursor:pointer; font-size: 11px; padding: 3px 9px; border-radius: 4px;">
+                                            <?= e(t('plan.action.undo')) ?>
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <form method="post" action="plan.php" style="margin:0;">
+                                        <input type="hidden" name="day_action" value="mark_done">
+                                        <input type="hidden" name="week_index" value="<?= $weekIdx ?>">
+                                        <input type="hidden" name="day" value="<?= e($dow) ?>">
+                                        <button type="submit" style="background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.4); color: var(--good); cursor:pointer; font-size: 11px; padding: 3px 9px; border-radius: 4px;">
+                                            <?= e(t('plan.action.mark_done')) ?>
+                                        </button>
+                                    </form>
+                                    <form method="post" action="plan.php" style="margin:0;">
+                                        <input type="hidden" name="day_action" value="mark_skipped">
+                                        <input type="hidden" name="week_index" value="<?= $weekIdx ?>">
+                                        <input type="hidden" name="day" value="<?= e($dow) ?>">
+                                        <button type="submit" class="muted" style="background:none; border:1px solid #333; color: var(--muted); cursor:pointer; font-size: 11px; padding: 3px 9px; border-radius: 4px;">
+                                            <?= e(t('plan.action.skip')) ?>
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+
+                                <?php if ($swappedFrom): ?>
+                                    <form method="post" action="plan.php" style="margin:0;">
+                                        <input type="hidden" name="day_action" value="clear_swap">
+                                        <input type="hidden" name="week_index" value="<?= $weekIdx ?>">
+                                        <input type="hidden" name="day" value="<?= e($dow) ?>">
+                                        <button type="submit" class="muted" style="background:none; border:1px solid #333; color: var(--muted); cursor:pointer; font-size: 11px; padding: 3px 9px; border-radius: 4px;">
+                                            <?= e(t('plan.action.unswap')) ?>
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <form method="post" action="plan.php" style="margin:0; display:flex; gap:4px; align-items:center;">
+                                        <input type="hidden" name="day_action" value="swap">
+                                        <input type="hidden" name="week_index" value="<?= $weekIdx ?>">
+                                        <input type="hidden" name="day" value="<?= e($dow) ?>">
+                                        <select name="swap_with" class="input" style="font-size: 11px; padding: 3px 6px; height: auto; min-width: 0; width: auto;">
+                                            <?php foreach ($dowOrder as $otherDow):
+                                                if ($otherDow === $dow) continue;
+                                                if (!isset($daysByCode[$otherDow])) continue;
+                                            ?>
+                                                <option value="<?= e($otherDow) ?>"><?= e(t('day.' . strtolower($otherDow))) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <button type="submit" class="muted" style="background:none; border:1px solid #333; color: var(--muted); cursor:pointer; font-size: 11px; padding: 3px 9px; border-radius: 4px;">
+                                            <?= e(t('plan.action.swap')) ?>
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
                     </div>

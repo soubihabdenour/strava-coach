@@ -53,6 +53,12 @@ return [
     'dashboard.today.upcoming_body' => 'Your plan kicks off on %s. Stay loose until then.',
     'dashboard.today.ended_title' => 'Plan ended',
     'dashboard.today.ended_body' => "Your plan ended on %s. Time to build a new one.",
+    'dashboard.today.swapped_from' => '↔ Swapped from %s — showing that day\'s workout here.',
+    'dashboard.today.manual_done' => '✓ Marked done',
+    'dashboard.today.manual_skipped' => '⏭ Skipped',
+
+    'dashboard.thisweek.title' => 'This week',
+    'dashboard.thisweek.open_full' => 'Open full plan →',
 
     'plan.title' => '%s plan',
     'plan.new' => 'New plan',
@@ -104,6 +110,18 @@ return [
     'plan.step.interval' => 'Interval',
     'plan.step.cooldown' => 'Cool-down',
     'plan.step.recovery_inline' => 'recovery: %s',
+
+    'plan.day.swapped_from' => 'was %s',
+    'plan.status.auto_matched' => 'Logged via Strava',
+    'plan.status.manual_done' => 'Marked done',
+    'plan.status.manual_skipped' => 'Skipped',
+    'plan.status.matched_inline' => '✓ Logged — %s, %s km',
+
+    'plan.action.mark_done' => '✓ Mark done',
+    'plan.action.skip' => '⏭ Skip',
+    'plan.action.undo' => '↺ Undo',
+    'plan.action.swap' => '↔ Swap',
+    'plan.action.unswap' => '↔ Unswap',
 
     'plan_form.title' => 'Build a training plan',
     'plan_form.back' => '← Back to dashboard',

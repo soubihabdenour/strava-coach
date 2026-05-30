@@ -26,22 +26,69 @@ class IcsExporter
         return implode("\r\n", $lines) . "\r\n";
     }
 
-    public static function fromPlan(array $plan, string $athleteName = 'Athlete'): string
+    public static function fromPlan(array $plan, string $athleteName = 'Athlete', ?int $athleteId = null): string
     {
-        $now = gmdate('Ymd\THis\Z');
-        $planId = (int)($plan['_id'] ?? 0);
-        $goal = $plan['goal'] ?? 'plan';
-        $domain = self::domain();
+        $body = array_merge(
+            self::headerLines($plan, $athleteName),
+            self::eventLinesForPlan($plan, $athleteId)
+        );
+        return self::assemble($body);
+    }
 
-        $lines = [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'PRODID:-//Strava Personal Coach//Plan Export//EN',
-            'CALSCALE:GREGORIAN',
-            'METHOD:PUBLISH',
+    /**
+     * Build a subscription feed: the active plan as live events PLUS STATUS:CANCELLED
+     * stubs for any future-dated events from archived plans that are no longer scheduled.
+     * Covers both UID schemes — legacy (plan_id-keyed, pre stable-UIDs) and stable
+     * (athlete-keyed) UIDs that the active plan no longer publishes.
+     */
+    public static function fromPlanForSubscription(
+        array $activePlan,
+        array $archivedPlans,
+        int $athleteId,
+        string $athleteName,
+        ?DateTimeImmutable $today = null
+    ): string {
+        $today ??= new DateTimeImmutable('today');
+        $body = array_merge(
+            self::headerLines($activePlan, $athleteName),
+            self::eventLinesForPlan($activePlan, $athleteId),
+            self::cancellationLines($activePlan, $archivedPlans, $athleteId, $today)
+        );
+        return self::assemble($body);
+    }
+
+    private static function assemble(array $bodyLines): string
+    {
+        $lines = array_merge(
+            [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Strava Personal Coach//Plan Export//EN',
+                'CALSCALE:GREGORIAN',
+                'METHOD:PUBLISH',
+            ],
+            $bodyLines,
+            ['END:VCALENDAR']
+        );
+        $folded = array_map([self::class, 'foldLine'], $lines);
+        return implode("\r\n", $folded) . "\r\n";
+    }
+
+    private static function headerLines(array $plan, string $athleteName): array
+    {
+        $goal = $plan['goal'] ?? 'plan';
+        return [
             'X-WR-CALNAME:' . self::escapeText('Training plan — ' . $goal),
             'X-WR-CALDESC:' . self::escapeText("{$athleteName}'s training plan, generated from Strava data."),
         ];
+    }
+
+    private static function eventLinesForPlan(array $plan, ?int $athleteId): array
+    {
+        $now = gmdate('Ymd\THis\Z');
+        $planId = (int)($plan['_id'] ?? 0);
+        $domain = self::domain();
+        $out = [];
 
         foreach ($plan['weeks'] ?? [] as $week) {
             $weekStart = $week['start'] ?? null;
@@ -59,25 +106,116 @@ class IcsExporter
 
                 $summary = self::buildSummary($day);
                 $body = self::buildDescription($day, $week);
-                $uid = sprintf('coach-plan-%d-w%d-%s-%s@%s', $planId, $weekIdx, $dayCode, $dateStr, $domain);
+                $uid = $athleteId
+                    ? self::stableUid($athleteId, $dateStr, $day['sport'] ?? 'x', $domain)
+                    : self::legacyUid($planId, $weekIdx, $dayCode, $dateStr, $domain);
 
-                $lines[] = 'BEGIN:VEVENT';
-                $lines[] = 'UID:' . $uid;
-                $lines[] = 'DTSTAMP:' . $now;
-                $lines[] = 'DTSTART;VALUE=DATE:' . $dateStr;
-                $lines[] = 'DTEND;VALUE=DATE:' . $dateEnd;
-                $lines[] = 'SUMMARY:' . self::escapeText($summary);
-                $lines[] = 'DESCRIPTION:' . self::escapeText($body);
-                $lines[] = 'CATEGORIES:Training,' . self::categoryToken($day['sport'] ?? '') . ',' . self::categoryToken($week['phase'] ?? '');
-                $lines[] = 'TRANSP:TRANSPARENT';
-                $lines[] = 'END:VEVENT';
+                array_push($out,
+                    'BEGIN:VEVENT',
+                    'UID:' . $uid,
+                    'DTSTAMP:' . $now,
+                    'DTSTART;VALUE=DATE:' . $dateStr,
+                    'DTEND;VALUE=DATE:' . $dateEnd,
+                    'SUMMARY:' . self::escapeText($summary),
+                    'DESCRIPTION:' . self::escapeText($body),
+                    'CATEGORIES:Training,' . self::categoryToken($day['sport'] ?? '') . ',' . self::categoryToken($week['phase'] ?? ''),
+                    'TRANSP:TRANSPARENT',
+                    'END:VEVENT'
+                );
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * For every future-dated workout in any archived plan, emit a STATUS:CANCELLED stub
+     * under both the legacy UID (subscribers from before stable UIDs) and the stable UID
+     * (subscribers who saw an earlier active plan publish that slot). Stable UIDs that the
+     * CURRENT active plan still publishes are left alone — those are updates, not cancellations.
+     */
+    private static function cancellationLines(
+        array $activePlan,
+        array $archivedPlans,
+        int $athleteId,
+        DateTimeImmutable $today
+    ): array {
+        $todayStr = $today->format('Ymd');
+        $domain = self::domain();
+        $now = gmdate('Ymd\THis\Z');
+
+        // Stable UIDs the active plan currently publishes — don't cancel these.
+        $activeStableUids = [];
+        foreach (self::scheduledDays($activePlan) as $row) {
+            [$dateStr, $sport] = $row;
+            $activeStableUids[self::stableUid($athleteId, $dateStr, $sport, $domain)] = true;
+        }
+
+        $cancels = []; // uid => YYYYMMDD (deduped across archived plans)
+        foreach ($archivedPlans as $arch) {
+            $archId = (int)($arch['_id'] ?? 0);
+            foreach (self::scheduledDays($arch) as $row) {
+                [$dateStr, $sport, $weekIdx, $dayCode] = $row;
+                if ($dateStr < $todayStr) continue;
+
+                // Always cancel the legacy UID (cheap; ignored by clients that never saw it)
+                $legacy = self::legacyUid($archId, $weekIdx, $dayCode, $dateStr, $domain);
+                $cancels[$legacy] = $dateStr;
+
+                // Cancel the stable UID only when the active plan doesn't republish that slot
+                $stable = self::stableUid($athleteId, $dateStr, $sport, $domain);
+                if (!isset($activeStableUids[$stable])) {
+                    $cancels[$stable] = $dateStr;
+                }
             }
         }
 
-        $lines[] = 'END:VCALENDAR';
+        $out = [];
+        foreach ($cancels as $uid => $dateStr) {
+            array_push($out,
+                'BEGIN:VEVENT',
+                'UID:' . $uid,
+                'DTSTAMP:' . $now,
+                'DTSTART;VALUE=DATE:' . $dateStr,
+                'SEQUENCE:1',
+                'STATUS:CANCELLED',
+                'SUMMARY:' . self::escapeText('(removed)'),
+                'END:VEVENT'
+            );
+        }
+        return $out;
+    }
 
-        $folded = array_map([self::class, 'foldLine'], $lines);
-        return implode("\r\n", $folded) . "\r\n";
+    /**
+     * @return array<int, array{0: string, 1: string, 2: int, 3: string}> [dateYmd, sport, weekIdx, dayCode]
+     */
+    private static function scheduledDays(array $plan): array
+    {
+        $out = [];
+        foreach ($plan['weeks'] ?? [] as $week) {
+            $weekStart = $week['start'] ?? null;
+            if (!$weekStart) continue;
+            $weekIdx = (int)($week['index'] ?? 0);
+            foreach ($week['days'] ?? [] as $day) {
+                $sport = $day['sport'] ?? 'rest';
+                if ($sport === 'rest') continue;
+                $dayCode = $day['day'] ?? 'Mon';
+                $offset = self::DOW_OFFSET[$dayCode] ?? 0;
+                $dateStr = (new DateTimeImmutable($weekStart))->modify("+{$offset} days")->format('Ymd');
+                $out[] = [$dateStr, $sport, $weekIdx, $dayCode];
+            }
+        }
+        return $out;
+    }
+
+    private static function stableUid(int $athleteId, string $dateYmd, string $sport, string $domain): string
+    {
+        $sport = preg_replace('/[^a-zA-Z0-9]/', '', $sport ?: 'x');
+        return sprintf('coach-a%d-%s-%s@%s', $athleteId, $dateYmd, $sport, $domain);
+    }
+
+    private static function legacyUid(int $planId, int $weekIdx, string $dayCode, string $dateYmd, string $domain): string
+    {
+        return sprintf('coach-plan-%d-w%d-%s-%s@%s', $planId, $weekIdx, $dayCode, $dateYmd, $domain);
     }
 
     private static function buildSummary(array $day): string

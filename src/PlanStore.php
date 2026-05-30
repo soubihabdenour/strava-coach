@@ -79,4 +79,28 @@ class PlanStore
               WHERE athlete_id = :ath AND is_active = 1'
         )->execute([':ath' => $athleteId, ':now' => time()]);
     }
+
+    /**
+     * Archived plans whose goal_date is still in the future (so they may have
+     * VEVENTs that calendar subscribers still hold and need cancelled).
+     *
+     * @return array<int, array<string,mixed>>
+     */
+    public function getArchivedWithFutureEvents(int $athleteId, string $todayDate): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT id, plan_json FROM plans
+              WHERE athlete_id = :ath AND is_active = 0 AND goal_date >= :today
+              ORDER BY id DESC'
+        );
+        $stmt->execute([':ath' => $athleteId, ':today' => $todayDate]);
+        $out = [];
+        while ($row = $stmt->fetch()) {
+            $plan = json_decode($row['plan_json'], true);
+            if (!is_array($plan)) continue;
+            $plan['_id'] = (int)$row['id'];
+            $out[] = $plan;
+        }
+        return $out;
+    }
 }

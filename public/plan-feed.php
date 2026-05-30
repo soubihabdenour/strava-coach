@@ -23,11 +23,27 @@ header('Content-Type: text/calendar; charset=utf-8');
 header('Cache-Control: no-cache, must-revalidate');
 header('X-Robots-Tag: noindex, nofollow');
 
+$athlete = token_store()->getAthlete($athleteId);
+$name = $athlete['firstname'] ?? 'Athlete';
+
+$today = new DateTimeImmutable('today');
+$archived = plan_store()->getArchivedWithFutureEvents($athleteId, $today->format('Y-m-d'));
+
 if (!$plan) {
-    echo IcsExporter::emptyCalendar('Training plan — no active plan');
+    if (empty($archived)) {
+        echo IcsExporter::emptyCalendar('Training plan — no active plan');
+        exit;
+    }
+    // No active plan but archived plans still have future events — emit cancellations
+    // so subscribers' calendars cleanly remove them.
+    echo IcsExporter::fromPlanForSubscription(
+        ['goal' => 'plan', 'weeks' => []],
+        $archived,
+        $athleteId,
+        $name,
+        $today
+    );
     exit;
 }
 
-$athlete = token_store()->getAthlete($athleteId);
-$name = $athlete['firstname'] ?? 'Athlete';
-echo IcsExporter::fromPlan($plan, $name);
+echo IcsExporter::fromPlanForSubscription($plan, $archived, $athleteId, $name, $today);

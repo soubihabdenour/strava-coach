@@ -15,7 +15,7 @@ if (!$plan) {
 }
 
 $athleteName = $_SESSION['athlete']['firstname'] ?? 'Athlete';
-$ics = IcsExporter::fromPlan($plan, $athleteName);
+$ics = IcsExporter::fromPlan($plan, $athleteName, $athleteId);
 
 $slug = preg_replace('/[^a-zA-Z0-9._-]/', '-', ($plan['goal'] ?? 'plan') . '-' . ($plan['start_date'] ?? date('Y-m-d')));
 $filename = 'coach-plan-' . $slug . '.ics';

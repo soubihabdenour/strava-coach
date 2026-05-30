@@ -4,7 +4,8 @@
 /** @var array $tips */
 /** @var ?array $plan */
 /** @var ?array $todayCtx */
-/** @var ?array $todayMatch */
+/** @var ?array $todayStatus */
+/** @var ?array $weekCtx */
 $weeks = $summary['weeks'];
 $maxKm = max(0.1, max(array_column($weeks, 'distance_km')));
 $delta = $summary['volume_change_pct'];
@@ -51,8 +52,10 @@ $sportIcons = ['run' => 'run', 'bike' => 'bike', 'swim' => 'swim', 'multi' => 't
     $tDay = $todayCtx['day'];
     $tWeek = $todayCtx['week'];
     $tDateLabel = (new DateTimeImmutable($todayCtx['today']))->format('D, M j');
+    $tStatus = $todayStatus['status'] ?? 'pending';
+    $tAct = $todayStatus['activity'] ?? null;
     $isRest = ($tDay['sport'] ?? 'rest') === 'rest';
-    $isUnattributed = in_array($tDay['sport'] ?? '', ['strength', 'multi'], true);
+    $tSwappedFrom = $todayCtx['swapped_from'] ?? null;
 ?>
 <div class="card" style="border-left: 4px solid var(--accent);">
     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
@@ -71,6 +74,11 @@ $sportIcons = ['run' => 'run', 'bike' => 'bike', 'swim' => 'swim', 'multi' => 't
             </span>
         </div>
     </div>
+    <?php if ($tSwappedFrom): ?>
+        <div style="color: var(--muted); font-size: 12px; margin-bottom: 6px;">
+            <?= e(t('dashboard.today.swapped_from', t('day.' . strtolower($tSwappedFrom)))) ?>
+        </div>
+    <?php endif; ?>
     <div style="display:flex; align-items:center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;">
         <span class="day-type" style="background: <?= $dayColors[$tDay['type']] ?? '#3a3f4a' ?>;">
             <?= icon($sportIcons[$tDay['sport']] ?? 'run') ?><?= e($tDay['title']) ?>
@@ -80,22 +88,107 @@ $sportIcons = ['run' => 'run', 'bike' => 'bike', 'swim' => 'swim', 'multi' => 't
         <?php endif; ?>
     </div>
     <p style="margin: 0 0 12px;"><?= e($tDay['desc']) ?></p>
-    <?php if ($todayMatch): ?>
-        <div style="color: var(--good); font-size: 13px;">
-            <?= e(t('dashboard.today.matched',
-                $todayMatch['name'] ?? '—',
-                number_format(($todayMatch['distance'] ?? 0) / 1000, 1)
-            )) ?>
-            <a class="muted" href="https://www.strava.com/activities/<?= (int)($todayMatch['id'] ?? 0) ?>" target="_blank" rel="noopener" style="margin-left: 8px;">↗ Strava</a>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap: 12px; flex-wrap: wrap;">
+        <div style="font-size: 13px; flex: 1; min-width: 200px;">
+            <?php if ($tStatus === 'auto_matched' && $tAct): ?>
+                <span style="color: var(--good);">
+                    <?= e(t('dashboard.today.matched',
+                        $tAct['name'] ?? '—',
+                        number_format(($tAct['distance'] ?? 0) / 1000, 1)
+                    )) ?>
+                    <a class="muted" href="https://www.strava.com/activities/<?= (int)($tAct['id'] ?? 0) ?>" target="_blank" rel="noopener" style="margin-left: 8px;">↗ Strava</a>
+                </span>
+            <?php elseif ($tStatus === 'manual_done'): ?>
+                <span style="color: var(--good);"><?= e(t('dashboard.today.manual_done')) ?></span>
+            <?php elseif ($tStatus === 'manual_skipped'): ?>
+                <span style="color: var(--muted);"><?= e(t('dashboard.today.manual_skipped')) ?></span>
+            <?php elseif ($isRest): ?>
+                <span style="color: var(--muted);"><?= e(t('dashboard.today.rest_note')) ?></span>
+            <?php else: ?>
+                <span style="color: var(--muted);"><?= e(t('dashboard.today.pending')) ?></span>
+            <?php endif; ?>
         </div>
-    <?php elseif ($isRest): ?>
-        <div style="color: var(--muted); font-size: 13px;"><?= e(t('dashboard.today.rest_note')) ?></div>
-    <?php elseif ($isUnattributed): ?>
-        <div style="color: var(--muted); font-size: 13px;"><?= e(t('dashboard.today.manual_note')) ?></div>
-    <?php else: ?>
-        <div style="color: var(--muted); font-size: 13px;"><?= e(t('dashboard.today.pending')) ?></div>
-    <?php endif; ?>
+        <div style="display:flex; gap: 6px;">
+            <?php if ($tStatus === 'manual_done' || $tStatus === 'manual_skipped'): ?>
+                <form method="post" action="plan.php" style="margin:0;">
+                    <input type="hidden" name="day_action" value="clear_status">
+                    <input type="hidden" name="week_index" value="<?= (int)$todayCtx['week_index'] ?>">
+                    <input type="hidden" name="day" value="<?= e($todayCtx['today_dow']) ?>">
+                    <input type="hidden" name="return_to" value="dashboard.php">
+                    <button type="submit" class="muted" style="background:none; border:1px solid #333; color: var(--muted); cursor:pointer; font-size: 12px; padding: 4px 10px; border-radius: 4px;">
+                        <?= e(t('plan.action.undo')) ?>
+                    </button>
+                </form>
+            <?php elseif (!$isRest && $tStatus !== 'auto_matched'): ?>
+                <form method="post" action="plan.php" style="margin:0;">
+                    <input type="hidden" name="day_action" value="mark_done">
+                    <input type="hidden" name="week_index" value="<?= (int)$todayCtx['week_index'] ?>">
+                    <input type="hidden" name="day" value="<?= e($todayCtx['today_dow']) ?>">
+                    <input type="hidden" name="return_to" value="dashboard.php">
+                    <button type="submit" class="btn" style="font-size: 12px; padding: 6px 12px; border: none; cursor: pointer;">
+                        <?= e(t('plan.action.mark_done')) ?>
+                    </button>
+                </form>
+                <form method="post" action="plan.php" style="margin:0;">
+                    <input type="hidden" name="day_action" value="mark_skipped">
+                    <input type="hidden" name="week_index" value="<?= (int)$todayCtx['week_index'] ?>">
+                    <input type="hidden" name="day" value="<?= e($todayCtx['today_dow']) ?>">
+                    <input type="hidden" name="return_to" value="dashboard.php">
+                    <button type="submit" class="muted" style="background:none; border:1px solid #333; color: var(--muted); cursor:pointer; font-size: 12px; padding: 4px 10px; border-radius: 4px;">
+                        <?= e(t('plan.action.skip')) ?>
+                    </button>
+                </form>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>
+
+<?php if ($weekCtx): ?>
+<div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <h2 style="margin:0;"><?= e(t('dashboard.thisweek.title')) ?></h2>
+        <div style="color: var(--muted); font-size: 13px;">
+            <?= e(t('dashboard.today.week_progress', $weekCtx['week_index'], $weekCtx['weeks_total'])) ?>
+            <?php if (!empty($weekCtx['theme'])): ?> · <?= e($weekCtx['theme']) ?><?php endif; ?>
+        </div>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px;">
+        <?php foreach ($weekCtx['days'] as $wd):
+            $wSport = $wd['plan']['sport'] ?? 'rest';
+            $wStatus = $wd['match']['status'];
+            $statusIcon = match (true) {
+                $wStatus === 'auto_matched' || $wStatus === 'manual_done' => '<span style="color: var(--good);">✓</span>',
+                $wStatus === 'manual_skipped' => '<span style="color: var(--muted);">⏭</span>',
+                $wd['is_past'] && $wSport !== 'rest' => '<span style="color: #ef4444;">✗</span>',
+                $wd['is_future'] => '<span style="color: #444;">◯</span>',
+                default => '<span style="color: var(--muted);">◯</span>',
+            };
+            $cellBg = $wd['is_today'] ? '#1a2236' : '#0f1115';
+            $cellBorder = $wd['is_today'] ? '1px solid var(--accent)' : '1px solid #1f1f1f';
+        ?>
+            <div style="padding: 8px; border-radius: 6px; background: <?= $cellBg ?>; border: <?= $cellBorder ?>; min-height: 86px; display:flex; flex-direction:column; gap:4px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size: 11px; color: var(--muted);">
+                    <span><?= e(t('day.' . strtolower($wd['day']))) ?></span>
+                    <span><?= $statusIcon ?></span>
+                </div>
+                <?php if ($wd['plan']): ?>
+                    <div style="font-size: 11px; color: var(--text); line-height: 1.25; overflow:hidden; display:-webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                        <?= icon($sportIcons[$wSport] ?? 'rest', 'icon icon-sm') ?>
+                        <?= e($wd['plan']['title'] ?? '') ?>
+                    </div>
+                    <?php if (!empty($wd['swapped_from'])): ?>
+                        <div style="font-size: 10px; color: var(--accent);">↔ <?= e(t('day.' . strtolower($wd['swapped_from']))) ?></div>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <div style="margin-top: 10px; font-size: 12px; color: var(--muted); text-align: right;">
+        <a class="muted" href="plan.php"><?= e(t('dashboard.thisweek.open_full')) ?></a>
+    </div>
+</div>
+<?php endif; ?>
 <?php elseif ($plan && $todayCtx && $todayCtx['state'] === 'pre_start'): ?>
 <div class="card" style="border-left: 4px solid var(--info);">
     <h2 style="margin: 0 0 6px;"><?= e(t('dashboard.today.upcoming_title')) ?></h2>

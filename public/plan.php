@@ -22,6 +22,42 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
     exit;
 }
 
+// Per-day actions: mark done / skipped / clear / swap.
+// Validate against the *active* plan to prevent writes to archived plans via stale forms.
+$dayAction = $_POST['day_action'] ?? null;
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($dayAction, ['mark_done','mark_skipped','clear_status','swap','clear_swap'], true)) {
+    $active = $plans->getActive($athleteId);
+    if ($active) {
+        $planId = (int)$active['_id'];
+        $weekIdx = (int)($_POST['week_index'] ?? 0);
+        $day = (string)($_POST['day'] ?? '');
+        $actions = plan_actions();
+
+        switch ($dayAction) {
+            case 'mark_done':
+                $actions->setStatus($planId, $weekIdx, $day, 'done');
+                break;
+            case 'mark_skipped':
+                $actions->setStatus($planId, $weekIdx, $day, 'skipped');
+                break;
+            case 'clear_status':
+                $actions->clearStatus($planId, $weekIdx, $day);
+                break;
+            case 'swap':
+                $other = (string)($_POST['swap_with'] ?? '');
+                $actions->setSwap($planId, $weekIdx, $day, $other);
+                break;
+            case 'clear_swap':
+                $actions->clearSwap($planId, $weekIdx, $day);
+                break;
+        }
+    }
+    $redirect = $_POST['return_to'] ?? 'plan.php';
+    if (!in_array($redirect, ['plan.php', 'dashboard.php'], true)) $redirect = 'plan.php';
+    header('Location: ' . $redirect);
+    exit;
+}
+
 $apiKey = Config::get('GEMINI_API_KEY');
 $aiAvailable = !empty($apiKey);
 
@@ -144,6 +180,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
 
 if ($plan = $plans->getActive($athleteId)) {
     $completion = null;
+    $activities = [];
     try {
         $activities = $store->getRecent($athleteId, 56);
         $completion = CompletionTracker::perWeek($plan, $activities);
@@ -156,11 +193,14 @@ if ($plan = $plans->getActive($athleteId)) {
         $_SERVER['HTTP_HOST'] ?? 'localhost',
         $calendarToken
     );
+    $actionsMap = plan_actions()->forPlan((int)$plan['_id']);
     render('plan', [
         'plan' => $plan,
         'completion' => $completion,
         'aiAvailable' => $aiAvailable,
         'feedUrl' => $feedUrl,
+        'activities' => $activities,
+        'actionsMap' => $actionsMap,
     ]);
     exit;
 }

@@ -115,5 +115,18 @@ class Db
             )
         ");
         $pdo->exec("CREATE INDEX IF NOT EXISTS idx_plans_athlete_active ON plans(athlete_id, is_active)");
+
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS plan_day_actions (
+                plan_id INTEGER NOT NULL REFERENCES plans(id) ON DELETE CASCADE,
+                week_index INTEGER NOT NULL,
+                day TEXT NOT NULL,
+                status TEXT,
+                swap_with TEXT,
+                note TEXT,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY (plan_id, week_index, day)
+            )
+        ");
     }
 }

@@ -22,10 +22,17 @@ $summary = $coach->summary();
 $tips = $coach->recommendations();
 
 $plan = plan_store()->getActive($athleteId);
-$todayCtx = $plan ? PlanProgress::todayContext($plan) : null;
-$todayMatch = ($todayCtx && $todayCtx['state'] === 'active')
-    ? PlanProgress::matchActivity($todayCtx['day'], $todayCtx['today'], $activities)
-    : null;
+$actionsMap = $plan ? plan_actions()->forPlan((int)$plan['_id']) : [];
+$todayCtx = $plan ? PlanProgress::todayContext($plan, $actionsMap) : null;
+$todayStatus = null;
+if ($todayCtx && $todayCtx['state'] === 'active') {
+    $todayKey = $todayCtx['week_index'] . ':' . $todayCtx['today_dow'];
+    $todayAction = $actionsMap[$todayKey] ?? null;
+    $todayStatus = PlanProgress::matchActivityStatus(
+        $todayCtx['day'], $todayCtx['today'], $activities, $todayAction
+    );
+}
+$weekCtx = $plan ? PlanProgress::weekContext($plan, $activities, $actionsMap) : null;
 
 render('dashboard', [
     'athlete' => $athlete,
@@ -33,5 +40,6 @@ render('dashboard', [
     'tips' => $tips,
     'plan' => $plan,
     'todayCtx' => $todayCtx,
-    'todayMatch' => $todayMatch,
+    'todayStatus' => $todayStatus,
+    'weekCtx' => $weekCtx,
 ]);

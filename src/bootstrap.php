@@ -14,6 +14,7 @@ require_once __DIR__ . '/AiPlanGenerator.php';
 require_once __DIR__ . '/CompletionTracker.php';
 require_once __DIR__ . '/CoachAgent.php';
 require_once __DIR__ . '/PlanStore.php';
+require_once __DIR__ . '/PlanActions.php';
 require_once __DIR__ . '/PlanProgress.php';
 require_once __DIR__ . '/IcsExporter.php';
 
@@ -67,6 +68,15 @@ function plan_store(): PlanStore
     static $store = null;
     if ($store === null) {
         $store = new PlanStore(Db::pdo());
+    }
+    return $store;
+}
+
+function plan_actions(): PlanActions
+{
+    static $store = null;
+    if ($store === null) {
+        $store = new PlanActions(Db::pdo());
     }
     return $store;
 }

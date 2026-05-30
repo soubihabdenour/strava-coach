@@ -60,6 +60,70 @@
         <label class="field"><?= e(t('plan_form.injuries')) ?></label>
         <textarea class="input" name="injuries" rows="2" maxlength="500" placeholder="<?= e(t('plan_form.injuries_placeholder')) ?>"></textarea>
 
+        <details style="margin: 24px 0 0;">
+            <summary style="cursor: pointer; color: var(--accent); font-size: 14px; padding: 6px 0;">
+                <?= e(t('plan_form.adv.title')) ?>
+            </summary>
+            <div style="margin-top: 12px; padding: 16px; background: #0f1115; border-radius: 8px;">
+                <div style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">
+                    <?= e(t('plan_form.adv.hint')) ?>
+                </div>
+
+                <label class="field"><?= e(t('plan_form.cant_train_days')) ?></label>
+                <div style="display:flex; gap: 6px; flex-wrap: wrap;">
+                    <?php foreach (['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $d): ?>
+                        <label style="display:flex; align-items:center; gap:6px; padding: 6px 10px; background:#1a1d24; border-radius:6px; cursor:pointer; font-size:13px;">
+                            <input type="checkbox" name="cant_train_days[]" value="<?= $d ?>" style="accent-color: var(--accent);">
+                            <span><?= e(t('day.' . strtolower($d))) ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+                <div style="color: var(--muted); font-size: 12px; margin-top: 6px;"><?= e(t('plan_form.cant_train_hint')) ?></div>
+
+                <label class="field"><?= e(t('plan_form.sessions_override')) ?></label>
+                <select class="input" name="sessions_override">
+                    <option value=""><?= e(t('plan_form.sessions_default')) ?></option>
+                    <?php foreach ([3,4,5,6,7,8,9] as $n): ?>
+                        <option value="<?= $n ?>"><?= $n ?> / week</option>
+                    <?php endforeach; ?>
+                </select>
+
+                <label class="field"><?= e(t('plan_form.target_time')) ?></label>
+                <input class="input" type="text" name="target_time" maxlength="60" placeholder="<?= e(t('plan_form.target_time_placeholder')) ?>">
+
+                <label class="field"><?= e(t('plan_form.intensity')) ?></label>
+                <select class="input" name="intensity_preference">
+                    <option value="polarized" selected><?= e(t('plan_form.intensity.polarized')) ?></option>
+                    <option value="pyramidal"><?= e(t('plan_form.intensity.pyramidal')) ?></option>
+                    <option value="threshold"><?= e(t('plan_form.intensity.threshold')) ?></option>
+                </select>
+
+                <label class="field"><?= e(t('plan_form.surface')) ?></label>
+                <select class="input" name="surface">
+                    <option value="mixed" selected><?= e(t('plan_form.surface.mixed')) ?></option>
+                    <option value="road"><?= e(t('plan_form.surface.road')) ?></option>
+                    <option value="trail"><?= e(t('plan_form.surface.trail')) ?></option>
+                    <option value="track"><?= e(t('plan_form.surface.track')) ?></option>
+                    <option value="treadmill"><?= e(t('plan_form.surface.treadmill')) ?></option>
+                </select>
+
+                <label class="field"><?= e(t('plan_form.pool_length')) ?></label>
+                <select class="input" name="pool_length">
+                    <option value="25m" selected><?= e(t('plan_form.pool_25m')) ?></option>
+                    <option value="50m"><?= e(t('plan_form.pool_50m')) ?></option>
+                    <option value="25y"><?= e(t('plan_form.pool_25y')) ?></option>
+                    <option value="ow"><?= e(t('plan_form.pool_ow')) ?></option>
+                </select>
+
+                <label class="field"><?= e(t('plan_form.bike_location')) ?></label>
+                <select class="input" name="bike_location">
+                    <option value="mixed" selected><?= e(t('plan_form.bike.mixed')) ?></option>
+                    <option value="outdoor"><?= e(t('plan_form.bike.outdoor')) ?></option>
+                    <option value="indoor"><?= e(t('plan_form.bike.indoor')) ?></option>
+                </select>
+            </div>
+        </details>
+
         <?php if ($aiAvailable): ?>
             <label style="display:flex; align-items:center; gap: 10px; margin: 20px 0 6px; cursor:pointer;">
                 <input type="checkbox" name="use_ai" value="1" checked style="width:18px; height:18px; accent-color: var(--accent);">

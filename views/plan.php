@@ -157,14 +157,82 @@ if ($completion) {
 
         <div style="display: grid; gap: 8px;">
             <?php foreach ($week['days'] as $day): ?>
+                <?php
+                    $hasSteps = !empty($day['structured_steps']);
+                    $hasMeta = !empty($day['purpose']) || !empty($day['rpe']) || !empty($day['fueling']);
+                ?>
                 <div class="plan-day">
                     <div class="day-name"><?= e(t('day.' . strtolower($day['day']))) ?></div>
                     <div>
                         <span class="day-type" style="background: <?= $dayColors[$day['type']] ?? '#3a3f4a' ?>;">
                             <?= icon($sportIcons[$day['sport'] ?? 'run'] ?? 'run') ?><?= e($day['title']) ?>
                         </span>
+                        <?php if (($day['distance_km'] ?? 0) > 0 || !empty($day['duration_min'])): ?>
+                            <span style="color: var(--muted); margin-left: 8px; font-size: 13px;">
+                                <?php if (($day['distance_km'] ?? 0) > 0): ?><?= e(t('dashboard.unit.km', number_format($day['distance_km'], 1))) ?><?php endif; ?>
+                                <?php if (!empty($day['duration_min'])): ?> · <?= (int)$day['duration_min'] ?> min<?php endif; ?>
+                            </span>
+                        <?php endif; ?>
                     </div>
-                    <div class="day-desc"><?= e($day['desc']) ?></div>
+                    <div class="day-desc">
+                        <?php if ($day['desc'] !== ''): ?>
+                            <div style="margin-bottom: <?= ($hasSteps || $hasMeta || !empty($day['fueling'])) ? '8px' : '0' ?>;"><?= e($day['desc']) ?></div>
+                        <?php endif; ?>
+
+                        <?php if ($hasMeta): ?>
+                            <div style="display:flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 8px;">
+                                <?php if (!empty($day['purpose'])): ?>
+                                    <span><strong style="color: var(--text);"><?= e(t('plan.day.purpose')) ?>:</strong> <?= e($day['purpose']) ?></span>
+                                <?php endif; ?>
+                                <?php if (!empty($day['rpe'])): ?>
+                                    <span><strong style="color: var(--text);"><?= e(t('plan.day.rpe')) ?>:</strong> <?= (int)$day['rpe'] ?>/10</span>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if ($hasSteps): ?>
+                            <ol style="margin: 0 0 8px; padding-left: 18px; color: var(--text); font-size: 13px;">
+                                <?php foreach ($day['structured_steps'] as $step): ?>
+                                    <li style="margin-bottom: 4px;">
+                                        <strong style="color: var(--accent);"><?= e(t('plan.step.' . ($step['kind'] ?? 'main'))) ?></strong>
+                                        <?php
+                                            $bits = [];
+                                            if (!empty($step['reps']) && $step['reps'] > 1) {
+                                                $bits[] = (int)$step['reps'] . '×';
+                                            }
+                                            $vol = [];
+                                            if (!empty($step['distance_km'])) {
+                                                $vol[] = $step['distance_km'] >= 1
+                                                    ? number_format($step['distance_km'], 2) . ' km'
+                                                    : (int)round($step['distance_km'] * 1000) . ' m';
+                                            }
+                                            if (!empty($step['duration_min'])) {
+                                                $vol[] = (float)$step['duration_min'] >= 1
+                                                    ? rtrim(rtrim(number_format((float)$step['duration_min'], 1), '0'), '.') . ' min'
+                                                    : (int)round((float)$step['duration_min'] * 60) . ' s';
+                                            }
+                                            if ($vol) $bits[] = implode(' / ', $vol);
+                                            if (!empty($step['target'])) $bits[] = '@ ' . $step['target'];
+                                        ?>
+                                        <span style="color: var(--muted);"><?= e(implode(' ', $bits)) ?></span>
+                                        <?php if (!empty($step['recovery'])): ?>
+                                            <span style="color: var(--muted);"> · <?= e(t('plan.step.recovery_inline', $step['recovery'])) ?></span>
+                                        <?php endif; ?>
+                                        <?php if (!empty($step['notes'])): ?>
+                                            <div style="color: var(--muted); font-size: 12px; padding-left: 4px;"><?= e($step['notes']) ?></div>
+                                        <?php endif; ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ol>
+                        <?php endif; ?>
+
+                        <?php if (!empty($day['fueling'])): ?>
+                            <div style="display:flex; align-items:center; gap: 6px; padding: 6px 10px; background: rgba(252,76,2,0.08); border-radius: 6px; font-size: 12px; color: var(--text); margin-top: 4px;">
+                                <?= icon('nutrition', 'icon icon-sm') ?>
+                                <span><strong><?= e(t('plan.day.fueling')) ?>:</strong> <?= e($day['fueling']) ?></span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             <?php endforeach; ?>
         </div>

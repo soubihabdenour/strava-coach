@@ -27,6 +27,21 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
     $injuries = trim($_POST['injuries'] ?? '');
     $useAi = !empty($_POST['use_ai']) && $aiAvailable;
 
+    $cantTrainDays = array_values(array_intersect(
+        ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        (array)($_POST['cant_train_days'] ?? [])
+    ));
+    $sessionsOverride = (int)($_POST['sessions_override'] ?? 0) ?: null;
+    $targetTime = trim((string)($_POST['target_time'] ?? ''));
+    $intensityPref = in_array($_POST['intensity_preference'] ?? '', ['polarized','pyramidal','threshold'], true)
+        ? $_POST['intensity_preference'] : 'polarized';
+    $surface = in_array($_POST['surface'] ?? '', ['road','trail','track','treadmill','mixed'], true)
+        ? $_POST['surface'] : 'mixed';
+    $poolLength = in_array($_POST['pool_length'] ?? '', ['25m','50m','25y','ow'], true)
+        ? $_POST['pool_length'] : '25m';
+    $bikeLocation = in_array($_POST['bike_location'] ?? '', ['outdoor','indoor','mixed'], true)
+        ? $_POST['bike_location'] : 'mixed';
+
     if (!isset(PlanGenerator::GOALS[$goal]) || !$goalDate) {
         http_response_code(400);
         exit('Invalid input.');
@@ -56,6 +71,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
                 'injuries' => $injuries ?: 'none reported',
                 'baseline_km' => $baseline,
                 'paces' => $paces,
+                'cant_train_days' => $cantTrainDays,
+                'sessions_override' => $sessionsOverride,
+                'target_time' => $targetTime,
+                'intensity_preference' => $intensityPref,
+                'surface' => $surface,
+                'pool_length' => $poolLength,
+                'bike_location' => $bikeLocation,
             ], I18n::locale());
         } else {
             $plan = (new PlanGenerator())->generate($goal, $start, $end, $baseline);
@@ -90,11 +112,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
             new DateTimeImmutable($plan['goal_date']),
             [
                 'weekly_hours' => $plan['weekly_hours'] ?? 8,
-                'long_run_day' => 'Sun',
-                'injuries' => 'none reported',
+                'long_run_day' => $plan['long_run_day'] ?? 'Sun',
+                'injuries' => $plan['injuries'] ?: 'none reported',
                 'baseline_km' => $baseline,
                 'paces' => $paces,
                 'completion' => $completion,
+                'cant_train_days' => $plan['cant_train_days'] ?? [],
+                'sessions_override' => $plan['sessions_override'] ?? null,
+                'target_time' => $plan['target_time'] ?? '',
+                'intensity_preference' => $plan['intensity_preference'] ?? 'polarized',
+                'surface' => $plan['surface'] ?? 'mixed',
+                'pool_length' => $plan['pool_length'] ?? '25m',
+                'bike_location' => $plan['bike_location'] ?? 'mixed',
             ],
             I18n::locale()
         );

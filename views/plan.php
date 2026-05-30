@@ -219,6 +219,12 @@ if ($completion) {
                     $swappedFrom = $action['swap_with'];
                 }
 
+                $override = $action['override'] ?? null;
+                $isEdited = !empty($override);
+                if ($isEdited) {
+                    $day = array_merge($day, $override);
+                }
+
                 $dayDate = $weekMonday->modify('+' . $offset . ' days')->format('Y-m-d');
                 $matchInfo = PlanProgress::matchActivityStatus($day, $dayDate, $activities, $action);
                 $matchStatus = $matchInfo['status'];
@@ -246,6 +252,9 @@ if ($completion) {
                         <?php endif; ?>
                         <?php if ($swappedFrom): ?>
                             <span style="margin-left: 6px; font-size: 11px; color: var(--accent);">↔ <?= e(t('plan.day.swapped_from', t('day.' . strtolower($swappedFrom)))) ?></span>
+                        <?php endif; ?>
+                        <?php if ($isEdited): ?>
+                            <span style="margin-left: 6px; font-size: 11px; color: var(--accent);" title="<?= e(t('plan.day.edited_hint')) ?>">✎ <?= e(t('plan.day.edited')) ?></span>
                         <?php endif; ?>
                         <?php if (($day['distance_km'] ?? 0) > 0 || !empty($day['duration_min'])): ?>
                             <span style="color: var(--muted); margin-left: 8px; font-size: 13px;">
@@ -381,6 +390,32 @@ if ($completion) {
                                     </form>
                                 <?php endif; ?>
                             </div>
+
+                            <details style="margin-top: 8px;"<?= $isEdited ? ' open' : '' ?>>
+                                <summary style="cursor:pointer; color: var(--muted); font-size: 12px; padding: 4px 0;">
+                                    ✎ <?= e($isEdited ? t('plan.action.edit_open') : t('plan.action.edit')) ?>
+                                </summary>
+                                <form method="post" action="plan.php" style="display:grid; gap: 6px; margin-top: 8px; padding: 10px; background:#0f1115; border-radius: 6px;">
+                                    <input type="hidden" name="week_index" value="<?= $weekIdx ?>">
+                                    <input type="hidden" name="day" value="<?= e($dow) ?>">
+                                    <input type="text" name="override_title" class="input" maxlength="120" value="<?= e($day['title'] ?? '') ?>" placeholder="<?= e(t('plan.edit.title_ph')) ?>">
+                                    <div style="display:flex; gap: 6px;">
+                                        <input type="number" name="override_distance_km" step="0.1" min="0" max="500" class="input" style="flex:1; min-width:0;" placeholder="<?= e(t('plan.edit.distance_ph')) ?>" value="<?= e((string)($day['distance_km'] ?? '')) ?>">
+                                        <input type="number" name="override_duration_min" step="1" min="0" max="1440" class="input" style="flex:1; min-width:0;" placeholder="<?= e(t('plan.edit.duration_ph')) ?>" value="<?= e((string)($day['duration_min'] ?? '')) ?>">
+                                    </div>
+                                    <textarea name="override_desc" class="input" rows="2" maxlength="1000" placeholder="<?= e(t('plan.edit.desc_ph')) ?>"><?= e($day['desc'] ?? '') ?></textarea>
+                                    <div style="display:flex; gap: 6px; justify-content:flex-end;">
+                                        <?php if ($isEdited): ?>
+                                            <button type="submit" formnovalidate name="day_action" value="clear_override" class="muted" style="background:none; border:1px solid #333; color: var(--muted); cursor:pointer; font-size: 11px; padding: 4px 10px; border-radius: 4px;">
+                                                <?= e(t('plan.edit.reset')) ?>
+                                            </button>
+                                        <?php endif; ?>
+                                        <button type="submit" name="day_action" value="set_override" style="background:var(--accent); border:none; color:#fff; cursor:pointer; font-size: 12px; padding: 4px 12px; border-radius: 4px;">
+                                            <?= e(t('plan.edit.save')) ?>
+                                        </button>
+                                    </div>
+                                </form>
+                            </details>
                         <?php endif; ?>
                     </div>
                 </div>

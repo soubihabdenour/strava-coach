@@ -122,6 +122,18 @@ return [
     'plan.action.undo' => '↺ Undo',
     'plan.action.swap' => '↔ Swap',
     'plan.action.unswap' => '↔ Unswap',
+    'plan.action.edit' => 'Edit this workout',
+    'plan.action.edit_open' => 'Edit this workout (currently edited)',
+
+    'plan.day.edited' => 'edited',
+    'plan.day.edited_hint' => 'You manually edited this workout',
+
+    'plan.edit.title_ph' => 'Title (e.g. Tempo 6 km)',
+    'plan.edit.distance_ph' => 'Distance (km)',
+    'plan.edit.duration_ph' => 'Duration (min)',
+    'plan.edit.desc_ph' => 'Description / cues',
+    'plan.edit.save' => 'Save changes',
+    'plan.edit.reset' => '↺ Reset to original',
 
     'plan_form.title' => 'Build a training plan',
     'plan_form.back' => '← Back to dashboard',
@@ -169,6 +181,8 @@ return [
     'plan_form.bike.mixed' => 'Mixed',
     'plan_form.bike.outdoor' => 'Outdoor',
     'plan_form.bike.indoor' => 'Indoor trainer',
+    'plan_form.swim_days' => 'Days the pool is accessible',
+    'plan_form.swim_days_hint' => 'Pick the days you can actually swim. Leave empty if pool access is open every day. Swim sessions will only be scheduled on these days.',
 
     'goal.fitness' => 'General fitness',
     'goal.5k' => '5K race',

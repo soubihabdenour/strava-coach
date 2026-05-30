@@ -128,5 +128,13 @@ class Db
                 PRIMARY KEY (plan_id, week_index, day)
             )
         ");
+
+        // Idempotent column add for per-day edit overrides.
+        $cols = $pdo->query("PRAGMA table_info(plan_day_actions)")->fetchAll();
+        $hasOverride = false;
+        foreach ($cols as $c) if (($c['name'] ?? '') === 'override_json') { $hasOverride = true; break; }
+        if (!$hasOverride) {
+            $pdo->exec("ALTER TABLE plan_day_actions ADD COLUMN override_json TEXT");
+        }
     }
 }

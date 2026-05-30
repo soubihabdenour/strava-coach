@@ -25,7 +25,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
 // Per-day actions: mark done / skipped / clear / swap.
 // Validate against the *active* plan to prevent writes to archived plans via stale forms.
 $dayAction = $_POST['day_action'] ?? null;
-if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($dayAction, ['mark_done','mark_skipped','clear_status','swap','clear_swap'], true)) {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($dayAction, ['mark_done','mark_skipped','clear_status','swap','clear_swap','set_override','clear_override'], true)) {
     $active = $plans->getActive($athleteId);
     if ($active) {
         $planId = (int)$active['_id'];
@@ -49,6 +49,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($dayAction, ['mark
                 break;
             case 'clear_swap':
                 $actions->clearSwap($planId, $weekIdx, $day);
+                break;
+            case 'set_override':
+                $actions->setOverride($planId, $weekIdx, $day, [
+                    'title'        => $_POST['override_title'] ?? null,
+                    'distance_km'  => $_POST['override_distance_km'] ?? null,
+                    'duration_min' => $_POST['override_duration_min'] ?? null,
+                    'desc'         => $_POST['override_desc'] ?? null,
+                ]);
+                break;
+            case 'clear_override':
+                $actions->clearOverride($planId, $weekIdx, $day);
                 break;
         }
     }
@@ -83,6 +94,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
         ? $_POST['pool_length'] : '25m';
     $bikeLocation = in_array($_POST['bike_location'] ?? '', ['outdoor','indoor','mixed'], true)
         ? $_POST['bike_location'] : 'mixed';
+    $swimDays = array_values(array_intersect(
+        ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        (array)($_POST['swim_days'] ?? [])
+    ));
 
     if (!isset(PlanGenerator::GOALS[$goal]) || !$goalDate) {
         http_response_code(400);
@@ -120,6 +135,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
                 'surface' => $surface,
                 'pool_length' => $poolLength,
                 'bike_location' => $bikeLocation,
+                'swim_days' => $swimDays,
             ], I18n::locale());
         } else {
             $plan = (new PlanGenerator())->generate($goal, $start, $end, $baseline);
@@ -166,6 +182,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') ==
                 'surface' => $plan['surface'] ?? 'mixed',
                 'pool_length' => $plan['pool_length'] ?? '25m',
                 'bike_location' => $plan['bike_location'] ?? 'mixed',
+                'swim_days' => $plan['swim_days'] ?? [],
             ],
             I18n::locale()
         );

@@ -80,6 +80,18 @@ return [
     'plan.action.undo' => '↺ Annuler',
     'plan.action.swap' => '↔ Permuter',
     'plan.action.unswap' => '↔ Annuler permutation',
+    'plan.action.edit' => 'Modifier cette séance',
+    'plan.action.edit_open' => 'Modifier cette séance (déjà modifiée)',
+
+    'plan.day.edited' => 'modifié',
+    'plan.day.edited_hint' => 'Tu as modifié manuellement cette séance',
+
+    'plan.edit.title_ph' => 'Titre (ex. Tempo 6 km)',
+    'plan.edit.distance_ph' => 'Distance (km)',
+    'plan.edit.duration_ph' => 'Durée (min)',
+    'plan.edit.desc_ph' => 'Description / cues',
+    'plan.edit.save' => 'Enregistrer',
+    'plan.edit.reset' => '↺ Réinitialiser',
 
     'plan_form.adv.title' => '⚙ Options avancées',
     'plan_form.adv.hint' => 'Optionnel — ajuste le plan à ton planning, ton matériel et tes objectifs de course.',
@@ -108,6 +120,8 @@ return [
     'plan_form.bike.mixed' => 'Mixte',
     'plan_form.bike.outdoor' => 'Extérieur',
     'plan_form.bike.indoor' => 'Home-trainer',
+    'plan_form.swim_days' => 'Jours d\'accès à la piscine',
+    'plan_form.swim_days_hint' => 'Sélectionne les jours où tu peux nager. Laisse vide si la piscine est accessible tous les jours. Les séances de natation seront placées uniquement sur ces jours.',
 
     'plan.title' => 'Plan %s',
     'plan.new' => 'Nouveau plan',

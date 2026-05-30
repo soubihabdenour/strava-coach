@@ -115,6 +115,17 @@
                     <option value="ow"><?= e(t('plan_form.pool_ow')) ?></option>
                 </select>
 
+                <label class="field"><?= e(t('plan_form.swim_days')) ?></label>
+                <div style="display:flex; gap: 6px; flex-wrap: wrap;">
+                    <?php foreach (['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $d): ?>
+                        <label style="display:flex; align-items:center; gap:6px; padding: 6px 10px; background:#1a1d24; border-radius:6px; cursor:pointer; font-size:13px;">
+                            <input type="checkbox" name="swim_days[]" value="<?= $d ?>" style="accent-color: var(--accent);">
+                            <span><?= e(t('day.' . strtolower($d))) ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+                <div style="color: var(--muted); font-size: 12px; margin-top: 6px;"><?= e(t('plan_form.swim_days_hint')) ?></div>
+
                 <label class="field"><?= e(t('plan_form.bike_location')) ?></label>
                 <select class="input" name="bike_location">
                     <option value="mixed" selected><?= e(t('plan_form.bike.mixed')) ?></option>

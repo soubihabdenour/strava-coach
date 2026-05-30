@@ -12,7 +12,7 @@ class AiPlanGenerator
     /**
      * @param array $constraints Keys: weekly_hours, injuries, long_run_day, baseline_km, paces, completion,
      *                                  cant_train_days, sessions_override, target_time, intensity_preference,
-     *                                  surface, pool_length, bike_location
+     *                                  surface, pool_length, bike_location, swim_days
      */
     public function generate(
         string $goal,
@@ -66,6 +66,7 @@ class AiPlanGenerator
             'surface' => $constraints['surface'] ?? 'mixed',
             'pool_length' => $constraints['pool_length'] ?? '25m',
             'bike_location' => $constraints['bike_location'] ?? 'mixed',
+            'swim_days' => $constraints['swim_days'] ?? [],
             'weeks' => $weeksOut,
         ];
     }
@@ -157,6 +158,11 @@ PROMPT;
         }
         if (in_array($sport, ['swim', 'tri'], true)) {
             $envLines[] = '- Pool: ' . ($constraints['pool_length'] ?? '25m');
+            $swimDays = $constraints['swim_days'] ?? [];
+            if (!empty($swimDays)) {
+                $envLines[] = '- Pool access ONLY on: ' . implode(', ', $swimDays)
+                    . ' — schedule ALL swim sessions on these days only';
+            }
         }
         if (in_array($sport, ['bike', 'tri'], true)) {
             $envLines[] = '- Bike location: ' . ($constraints['bike_location'] ?? 'mixed');

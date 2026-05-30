@@ -61,7 +61,8 @@ class PlanProgress
 
         // Apply swap: if today's slot is swapped with another day, render the partner's planned workout here.
         $swappedFrom = null;
-        $swapPartner = $actions[$weekIndex . ':' . $todayDow]['swap_with'] ?? null;
+        $todayAction = $actions[$weekIndex . ':' . $todayDow] ?? null;
+        $swapPartner = $todayAction['swap_with'] ?? null;
         if ($swapPartner) {
             foreach ($weekData['days'] as $d) {
                 if (($d['day'] ?? '') === $swapPartner) {
@@ -71,6 +72,12 @@ class PlanProgress
                     break;
                 }
             }
+        }
+
+        // Apply per-day override (title/distance/duration/desc edits) on top of swap.
+        $override = $todayAction['override'] ?? null;
+        if ($override) {
+            $dayData = array_merge($dayData, $override);
         }
 
         $goalDate = new DateTimeImmutable($plan['goal_date']);
@@ -85,6 +92,7 @@ class PlanProgress
             'weeks_total'  => (int)($plan['weeks_total'] ?? count($plan['weeks'] ?? [])),
             'day'          => $dayData,
             'swapped_from' => $swappedFrom,
+            'edited'       => !empty($override),
             'days_to_goal' => $daysToGoal,
         ];
     }
@@ -132,6 +140,10 @@ class PlanProgress
                 $swappedFrom = $action['swap_with'];
             }
 
+            if ($plannedDay && !empty($action['override'])) {
+                $plannedDay = array_merge($plannedDay, $action['override']);
+            }
+
             $match = $plannedDay
                 ? self::matchActivityStatus($plannedDay, $date, $activities, $action)
                 : ['status' => 'pending', 'activity' => null];
@@ -141,6 +153,7 @@ class PlanProgress
                 'day' => $dow,
                 'plan' => $plannedDay,
                 'swapped_from' => $swappedFrom,
+                'edited' => !empty($action['override']),
                 'action' => $action,
                 'match' => $match,
                 'is_today' => $dow === $todayDow,
